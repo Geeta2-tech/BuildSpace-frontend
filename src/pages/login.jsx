@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
-import api from '../utils/api'; // Make sure to import the api utility
-
+import { sendVerificationCode, verifyCodeAndRegister } from '../apis/authApi'; // Import your auth functions
+import { useNavigate } from 'react-router-dom';
 // Logo Component
 const Logo = () => (
   <div className="w-8 h-8 bg-white">
@@ -113,7 +113,7 @@ const Login = () => {
   const [verificationCode, setVerificationCode] = useState('');
   const [showVerification, setShowVerification] = useState(false);
   const [resendCountdown, setResendCountdown] = useState(0);
-
+  const navigate = useNavigate();
   const handleSocialLogin = (provider) => {
     console.log(`Login with ${provider}`);
   };
@@ -122,10 +122,7 @@ const Login = () => {
     if (email && !showVerification) {
       // Send verification code if email is provided
       try {
-        await api.post({
-          endpoint: '/auth/send-verification-code',
-          data: { email },
-        });
+        await sendVerificationCode(email); // Use the imported function
         setShowVerification(true);
         setResendCountdown(16);
 
@@ -145,11 +142,10 @@ const Login = () => {
     } else if (verificationCode && showVerification) {
       // Verify code and register user
       try {
-        const response = await api.post({
-          endpoint: '/auth/verify-code-and-register',
-          data: { email, code: verificationCode },
-        });
+        console.log(verificationCode);
+        const response = await verifyCodeAndRegister(email, parseInt(verificationCode)); // Use the imported function
         console.log('User registered successfully:', response);
+        navigate('./home');
       } catch (error) {
         console.error('Error verifying code and registering:', error);
       }
@@ -159,10 +155,7 @@ const Login = () => {
   const handleResendCode = async () => {
     try {
       console.log(`Resend code to: ${email}`);
-      await api.post({
-        endpoint: '/auth/send-verification-code',
-        data: { email },
-      });
+      await sendVerificationCode(email); // Use the imported function
       setResendCountdown(16);
       const interval = setInterval(() => {
         setResendCountdown((prev) => {

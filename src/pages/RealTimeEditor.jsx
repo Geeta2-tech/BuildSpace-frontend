@@ -5,7 +5,7 @@ const RealTimeEditor = () => {
   const [ws, setWs] = useState(null);
 
   useEffect(() => {
-    const socket = new WebSocket('ws://192.168.0.127:3333');
+    const socket = new WebSocket('ws://localhost:3333');
     setWs(socket);
 
     socket.onopen = () => {
