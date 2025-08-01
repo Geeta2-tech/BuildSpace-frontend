@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import MainContent from '../components/MainContent';
@@ -7,27 +6,23 @@ import { useWorkspaces } from '../hooks/WorkspaceContext';
 import { usePages } from '../hooks/usePages';
 
 const Home = () => {
-  const { theme = 'light', toggleTheme } = useTheme(); 
+  const { theme = 'light', toggleTheme } = useTheme();
   const { workspaces, activeWorkspace, setActiveWorkspace } = useWorkspaces();
-  const { recentPages = [] } = usePages();
-
-  // Getting state from the navigate method
-  const location = useLocation();
-  const { recentPages: newRecentPages = [], theme: newTheme = 'light' } = location.state || {};
+  const { recentPages } = usePages();
 
   return (
-    <div className={`flex h-screen ${newTheme === 'dark' ? 'dark' : ''}`}>
-      <Sidebar 
+    <div className={`flex h-screen ${'dark' === 'dark' ? 'dark' : ''}`}>
+      <Sidebar
         workspaces={workspaces}
         activeWorkspace={activeWorkspace}
         setActiveWorkspace={setActiveWorkspace}
-        theme={newTheme}
+        theme={'dark'}
         toggleTheme={toggleTheme}
       />
       {activeWorkspace ? (
-        <MainContent 
-          recentPages={newRecentPages}
-          theme={newTheme}
+        <MainContent
+          recentPages={recentPages}
+          theme={'dark'}
           workspaceTitle={activeWorkspace.name}
         />
       ) : (

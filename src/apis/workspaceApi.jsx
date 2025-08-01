@@ -3,14 +3,7 @@ import { getUserFromToken } from '../utils/tokenStorage';
 
 // Function to create a workspace
 const createWorkspaceApi = async (name) => {
-
-  // Get user data directly
-  const currentUser = getUserFromToken();
-  console.log('currentUser',currentUser);
-  const userId = currentUser.userId;
-  const data = {userId,name};
-  console.log(data);
-  console.log(userId);
+  const data = { name };
   try {
     const response = await api.post({
       endpoint: '/workspace/create',
@@ -24,6 +17,18 @@ const createWorkspaceApi = async (name) => {
   }
 };
 
+const getAllWorkspaces = async () => {
+  try {
+    const response = await api.get({
+      endpoint: '/workspace/get-all',
+    });
+    return response;
+  } catch (error) {
+    console.error('Error fetching workspaces:', error);
+    throw error;
+  }
+};
+
 // Example usage
 export const handleWorkspaceCreation = async () => {
   try {
@@ -33,4 +38,4 @@ export const handleWorkspaceCreation = async () => {
   }
 };
 
-export default createWorkspaceApi;
+export { createWorkspaceApi, getAllWorkspaces };

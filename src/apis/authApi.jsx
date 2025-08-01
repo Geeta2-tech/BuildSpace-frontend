@@ -22,7 +22,7 @@ const verifyCodeAndRegister = async (email, code) => {
   try {
     console.log(data);
     const response = await api.post({
-      endpoint: '/auth/verify-code-and-register', 
+      endpoint: '/auth/verify-code-and-register',
       data, // Send the data object correctly
     });
     console.log('User registered successfully:', response);
@@ -40,6 +40,33 @@ const verifyCodeAndRegister = async (email, code) => {
   }
 };
 
+const registerUser = async ({ email, name, password }) => {
+  const data = { email, name, password };
+  try {
+    const response = await api.post({
+      endpoint: '/auth/register',
+      data,
+    });
+    return response;
+  } catch (error) {
+    console.error('Error registering user:', error);
+    throw error;
+  }
+};
 
+const loginUser = async ({ email, password }) => {
+  const data = { email, password };
+  try {
+    const response = await api.post({
+      endpoint: '/auth/login',
+      data,
+    });
+    console.log(response);
+    return response;
+  } catch (error) {
+    console.error('Error registering user:', error);
+    throw error;
+  }
+};
 
-export { sendVerificationCode, verifyCodeAndRegister };
+export { sendVerificationCode, verifyCodeAndRegister, registerUser, loginUser };
