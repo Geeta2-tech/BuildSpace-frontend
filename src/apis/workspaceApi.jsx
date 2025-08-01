@@ -1,20 +1,36 @@
-import api from './utils/api';
+import api from '../utils/api';
+import { getUserFromToken } from '../utils/tokenStorage';
 
 // Function to create a workspace
-const createWorkspace = async (name) => {
-  
-  const userId = '40ddd440-6935-4e80-87a3-c070d1bcea41';
+const createWorkspaceApi = async (name) => {
+
+  // Get user data directly
+  const currentUser = getUserFromToken();
+  console.log('currentUser',currentUser);
+  const userId = currentUser.userId;
+  const data = {userId,name};
+  console.log(data);
+  console.log(userId);
   try {
     const response = await api.post({
-      endpoint: '/workspace/create', // API endpoint
-      name,
-      userId, // Input data to send in the POST request
+      endpoint: '/workspace/create',
+      data,
     });
     console.log('Workspace created:', response);
+    return response;
   } catch (error) {
     console.error('Error creating workspace:', error);
+    throw error;
   }
 };
 
-// Call the createWorkspace function to execute the POST request
-createWorkspace();
+// Example usage
+export const handleWorkspaceCreation = async () => {
+  try {
+    await createWorkspace('My New Workspace');
+  } catch (error) {
+    console.error('Failed to create workspace:', error);
+  }
+};
+
+export default createWorkspaceApi;

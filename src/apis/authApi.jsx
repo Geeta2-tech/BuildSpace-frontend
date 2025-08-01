@@ -1,4 +1,4 @@
-import api from './utils/api'; // Assuming api is in utils/api.js
+import api from '../utils/api'; // Assuming api is in utils/api.js
 
 // Function to send verification code to user's email
 const sendVerificationCode = async (email) => {
@@ -18,20 +18,28 @@ const sendVerificationCode = async (email) => {
 
 // Function to verify code and register the user
 const verifyCodeAndRegister = async (email, code) => {
-  const data = { email, code }; // Input data containing email and verification code
-  
+  const data = { email, code }; // Send email and code together in the body
   try {
+    console.log(data);
     const response = await api.post({
-      endpoint: '/auth/verify-code-and-register', // API endpoint to verify and register
-      email,
-      code, // Send email and code data
+      endpoint: '/auth/verify-code-and-register', 
+      data, // Send the data object correctly
     });
     console.log('User registered successfully:', response);
-    return response; // You can return the response if needed
+
+    // Save tokens to localStorage
+    if (response && response.tokens) {
+      localStorage.setItem('accessToken', response.tokens.accessToken);
+      localStorage.setItem('refreshToken', response.tokens.refreshToken);
+    }
+
+    return response;
   } catch (error) {
     console.error('Error verifying code and registering:', error);
-    throw error; // Re-throw error to handle it later
+    throw error;
   }
 };
+
+
 
 export { sendVerificationCode, verifyCodeAndRegister };
