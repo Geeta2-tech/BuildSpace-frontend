@@ -1,17 +1,23 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronDown, Plus } from 'lucide-react';
 import Avatar from './Avatar';
 import { useNavigate } from 'react-router-dom';
+import { useWorkspaces } from '../hooks/WorkspaceContext';
 
-const WorkspaceSelector = ({ workspaces, activeWorkspace, setActiveWorkspace }) => {
+const WorkspaceSelector = ({
+  workspaces,
+  activeWorkspace,
+  setActiveWorkspace,
+}) => {
   const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
   const navigate = useNavigate();
 
-  // If no active workspace, show create workspace prompt
+  const hasWorkspaces =
+    workspaces.owned.length > 0 || workspaces.shared.length > 0;
   if (!activeWorkspace) {
     return (
       <div className="p-3 border-b border-gray-800">
-        <div 
+        <div
           className="flex items-center justify-between p-2 rounded-md hover:bg-gray-800 cursor-pointer"
           onClick={() => navigate('/createworkspace')}
         >
@@ -20,8 +26,12 @@ const WorkspaceSelector = ({ workspaces, activeWorkspace, setActiveWorkspace }) 
               <Plus className="w-4 h-4 text-gray-400" />
             </div>
             <div>
-              <div className="text-white text-sm font-medium">Create workspace</div>
-              <div className="text-gray-400 text-xs">Get started with a new workspace</div>
+              <div className="text-white text-sm font-medium">
+                Create workspace
+              </div>
+              <div className="text-gray-400 text-xs">
+                Get started with a new workspace
+              </div>
             </div>
           </div>
         </div>
@@ -31,7 +41,7 @@ const WorkspaceSelector = ({ workspaces, activeWorkspace, setActiveWorkspace }) 
 
   return (
     <div className="p-3 border-b border-gray-800">
-      <div 
+      <div
         className="flex items-center justify-between p-2 rounded-md hover:bg-gray-800 cursor-pointer"
         onClick={() => setShowWorkspaceMenu(!showWorkspaceMenu)}
       >
@@ -40,9 +50,12 @@ const WorkspaceSelector = ({ workspaces, activeWorkspace, setActiveWorkspace }) 
             {activeWorkspace.avatar || activeWorkspace.name?.charAt(0) || 'W'}
           </Avatar>
           <div>
-            <div className="text-white text-sm font-medium truncate">{activeWorkspace.name}</div>
+            <div className="text-white text-sm font-medium truncate">
+              {activeWorkspace.name}
+            </div>
             <div className="text-gray-400 text-xs">
-              {activeWorkspace.plan || 'Free'} • {activeWorkspace.members?.length || 0} members
+              {activeWorkspace.plan || 'Free'} •{' '}
+              {activeWorkspace.members?.length || 0} members
             </div>
           </div>
         </div>
@@ -51,38 +64,94 @@ const WorkspaceSelector = ({ workspaces, activeWorkspace, setActiveWorkspace }) 
 
       {showWorkspaceMenu && (
         <div className="mt-2 py-2 bg-gray-800 rounded-md w-72 absolute left-0 z-10">
-          {workspaces.length > 0 && (
+          {hasWorkspaces && (
             <>
-              <div className="px-3 py-1 text-xs text-gray-400 uppercase tracking-wide">Your Workspaces</div>
-              {workspaces.map(workspace => (
-                <div 
-                  key={workspace.id}
-                  className="flex items-center space-x-3 px-3 py-2 hover:bg-gray-700 cursor-pointer"
-                  onClick={() => {
-                    setActiveWorkspace(workspace);
-                    setShowWorkspaceMenu(false);
-                  }}
-                >
-                  <Avatar className={workspace.color || 'bg-blue-500'} size="sm">
-                    {workspace.avatar || workspace.name?.charAt(0) || 'W'}
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="text-white text-sm">{workspace.name}</div>
-                    <div className="text-gray-400 text-xs">{workspace.plan || 'Free'}</div>
+              {workspaces.owned.length > 0 && (
+                <>
+                  <div className="px-3 py-1 text-xs text-gray-400 uppercase tracking-wide">
+                    Your Workspaces
                   </div>
-                  {workspace.isOwner && <div className="w-2 h-2 bg-green-500 rounded-full" />}
-                </div>
-              ))}
+                  {workspaces.owned.map((workspace) => (
+                    <div
+                      key={workspace.id}
+                      className="flex items-center space-x-3 px-3 py-2 hover:bg-gray-700 cursor-pointer"
+                      onClick={() => {
+                        setActiveWorkspace(workspace);
+                        setShowWorkspaceMenu(false);
+                      }}
+                    >
+                      <Avatar
+                        className={workspace.color || 'bg-blue-500'}
+                        size="sm"
+                      >
+                        {workspace.avatar || workspace.name?.charAt(0) || 'W'}
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="text-white text-sm">
+                          {workspace.name}
+                        </div>
+                        <div className="text-gray-400 text-xs">
+                          {workspace.plan || 'Free'}
+                        </div>
+                      </div>
+                      {workspace.isOwner && (
+                        <div className="w-2 h-2 bg-green-500 rounded-full" />
+                      )}
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {workspaces.shared.length > 0 && (
+                <>
+                  <div className="px-3 py-1 mt-2 text-xs text-gray-400 uppercase tracking-wide">
+                    Shared With You
+                  </div>
+                  {workspaces.shared.map((workspace) => (
+                    <div
+                      key={workspace.id}
+                      className="flex items-center space-x-3 px-3 py-2 hover:bg-gray-700 cursor-pointer"
+                      onClick={() => {
+                        setActiveWorkspace(workspace);
+                        setShowWorkspaceMenu(false);
+                      }}
+                    >
+                      <Avatar
+                        className={workspace.color || 'bg-blue-500'}
+                        size="sm"
+                      >
+                        {workspace.avatar || workspace.name?.charAt(0) || 'W'}
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="text-white text-sm">
+                          {workspace.name}
+                        </div>
+                        <div className="text-gray-400 text-xs">
+                          {workspace.plan || 'Free'}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
               <hr className="my-2 border-gray-700" />
             </>
           )}
           <div className="px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 cursor-pointer flex items-center space-x-2">
             <Plus className="w-4 h-4" />
-            <span onClick={() => navigate('/createworkspace')}>New workspace</span>
+            <span onClick={() => navigate('/createworkspace')}>
+              New workspace
+            </span>
           </div>
-          <div className="px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 cursor-pointer">Add another account</div>
-          <div className="px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 cursor-pointer">Log out</div>
-          <div className="px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 cursor-pointer">Get Mac app</div>
+          <div className="px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 cursor-pointer">
+            Add another account
+          </div>
+          <div className="px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 cursor-pointer">
+            Log out
+          </div>
+          <div className="px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 cursor-pointer">
+            Get Mac app
+          </div>
         </div>
       )}
     </div>

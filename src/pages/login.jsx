@@ -2,16 +2,20 @@ import { useState } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { sendVerificationCode, verifyCodeAndRegister } from '../apis/authApi'; // Import your auth functions
 import { useNavigate } from 'react-router-dom';
+import BasicLogin from '../components/BasicLogin';
 // Logo Component
 const Logo = () => (
   <div className="w-8 h-8 bg-white">
-    <img src="https://cdn-icons-png.flaticon.com/128/5436/5436830.png" alt="logo" />
+    <img
+      src="https://cdn-icons-png.flaticon.com/128/5436/5436830.png"
+      alt="logo"
+    />
   </div>
 );
 
 // Social Login Button Component
 const SocialButton = ({ icon, text, onClick, isImage = false }) => (
-  <button 
+  <button
     onClick={onClick}
     className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
   >
@@ -64,9 +68,7 @@ const VerificationInput = ({ value, onChange }) => (
       placeholder="Enter code"
       className="w-full px-3 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
     />
-    <p className="text-xs text-gray-500">
-      We sent a code to your inbox
-    </p>
+    <p className="text-xs text-gray-500">We sent a code to your inbox</p>
   </div>
 );
 
@@ -76,7 +78,7 @@ const ResendLink = ({ onResend, countdown }) => (
     {countdown > 0 ? (
       <span className="text-sm text-gray-500">Resend in {countdown}s</span>
     ) : (
-      <button 
+      <button
         onClick={onResend}
         className="text-sm text-blue-600 hover:underline"
       >
@@ -101,9 +103,13 @@ const ContinueButton = ({ onClick, disabled }) => (
 const FooterLinks = () => (
   <p className="text-xs text-gray-500 text-center">
     By continuing, you acknowledge that you understand and agree to the{' '}
-    <a href="#" className="text-blue-600 hover:underline">Terms & Conditions</a>
-    {' '}and{' '}
-    <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>
+    <a href="#" className="text-blue-600 hover:underline">
+      Terms & Conditions
+    </a>{' '}
+    and{' '}
+    <a href="#" className="text-blue-600 hover:underline">
+      Privacy Policy
+    </a>
   </p>
 );
 
@@ -143,7 +149,10 @@ const Login = () => {
       // Verify code and register user
       try {
         console.log(verificationCode);
-        const response = await verifyCodeAndRegister(email, parseInt(verificationCode)); // Use the imported function
+        const response = await verifyCodeAndRegister(
+          email,
+          parseInt(verificationCode)
+        ); // Use the imported function
         console.log('User registered successfully:', response);
         navigate('./home');
       } catch (error) {
@@ -174,65 +183,82 @@ const Login = () => {
   const isButtonDisabled = showVerification ? !verificationCode : !email;
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <div className="w-full max-w-sm space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-3">
-          <Logo />
-          <div>
-            <h1 className="text-2xl font-semibold text-black">Think it. Make it.</h1>
-            <p className="text-gray-500 mt-1">Log in to your BuildSpace account</p>
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
+      {/* Top Centered Header */}
+      <div className="mb-10 text-center space-y-3">
+        <Logo />
+        <h1 className="text-2xl font-semibold text-black">
+          Think it. Make it.
+        </h1>
+        <p className="text-gray-500">Log in to your BuildSpace account</p>
+      </div>
+
+      {/* Two-Column Login Area */}
+      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-[1fr_1px_1fr] bg-white shadow-lg border rounded-lg overflow-hidden">
+        {/* Left Section */}
+        <div className="p-8 space-y-6 md:col-span-1">
+          {/* Social Buttons */}
+          <div className="space-y-3">
+            <GoogleLogin
+              onSuccess={(credentialResponse) =>
+                console.log(credentialResponse)
+              }
+              onError={() => console.log('Login Failed')}
+            />
+            <SocialButton
+              icon="👤"
+              text="Log in with passkey"
+              onClick={() => handleSocialLogin('Passkey')}
+            />
+            <SocialButton
+              icon="🔒"
+              text="Single sign-on (SSO)"
+              onClick={() => handleSocialLogin('SSO')}
+            />
+          </div>
+
+          {/* Email Code Login */}
+          <div className="space-y-4">
+            <EmailInput
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              showVerification={showVerification}
+            />
+            {showVerification && (
+              <VerificationInput
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+              />
+            )}
+            <ContinueButton
+              onClick={handleEmailContinue}
+              disabled={isButtonDisabled}
+            />
+            {showVerification && (
+              <ResendLink
+                onResend={handleResendCode}
+                countdown={resendCountdown}
+              />
+            )}
           </div>
         </div>
 
-        {/* Social Login Buttons */}
-        <div className="space-y-3">
-          <GoogleLogin
-            onSuccess={credentialResponse => {
-              console.log(credentialResponse);
-            }}
-            onError={() => {
-              console.log('Login Failed');
-            }}
-          />
-          <SocialButton 
-            icon="👤" 
-            text="Log in with passkey" 
-            onClick={() => handleSocialLogin('Passkey')}
-          />
-          <SocialButton 
-            icon="🔒" 
-            text="Single sign-on (SSO)" 
-            onClick={() => handleSocialLogin('SSO')}
-          />
+        {/* Vertical Separator */}
+        <div className="hidden md:flex justify-center items-stretch bg-gray-200 w-px">
+          <div className="h-5/6 w-px bg-gray-200"></div>
         </div>
 
-        {/* Email Login Form */}
-        <div className="space-y-4">
-          <EmailInput 
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            showVerification={showVerification}
-          />
-          {showVerification && (
-            <VerificationInput 
-              value={verificationCode}
-              onChange={(e) => setVerificationCode(e.target.value)}
-            />
-          )}
-          <ContinueButton 
-            onClick={handleEmailContinue}
-            disabled={isButtonDisabled}
-          />
-          {showVerification && (
-            <ResendLink 
-              onResend={handleResendCode}
-              countdown={resendCountdown}
-            />
-          )}
+        {/* Right Section */}
+        <div className="p-8 md:col-span-1">
+          <h2 className="text-center text-lg font-semibold text-gray-800 mb-4">
+            Login with Email & Password
+          </h2>
+          <BasicLogin />
         </div>
+      </div>
 
-        {/* Footer */}
+      {/* Footer */}
+      <div className="mt-6">
         <FooterLinks />
       </div>
     </div>
