@@ -69,4 +69,22 @@ const loginUser = async ({ email, password }) => {
   }
 };
 
-export { sendVerificationCode, verifyCodeAndRegister, registerUser, loginUser };
+const logoutUser = async () => {
+  try {
+    const response = await api.post({
+      endpoint: '/auth/logout',
+    });
+    return response;
+  } catch (error) {
+    console.error('Error registering user:', error);
+    throw error;
+  }
+};
+
+export {
+  sendVerificationCode,
+  verifyCodeAndRegister,
+  registerUser,
+  loginUser,
+  logoutUser,
+};

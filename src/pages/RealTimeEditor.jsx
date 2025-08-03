@@ -41,7 +41,7 @@ const RealTimeEditor = () => {
 
   return (
     <textarea
-    className='w-full'
+      className="w-full"
       value={text}
       onChange={handleTextChange}
       placeholder="Start typing..."

@@ -1,19 +1,22 @@
-import { useLocation } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import MainContent from '../components/MainContent';
 import { useTheme } from '../hooks/useTheme';
-import { useWorkspaces } from '../hooks/WorkspaceContext';
+import { useWorkspaces } from '../hooks/useWorkspaces';
 import { usePages } from '../hooks/usePages';
 
 const Home = () => {
   const { theme = 'light', toggleTheme } = useTheme();
-  const { workspaces, activeWorkspace, setActiveWorkspace } = useWorkspaces();
+  const { workspaces, activeWorkspace, setActiveWorkspace, workspaceMembers } =
+    useWorkspaces();
   const { recentPages } = usePages();
 
   return (
-    <div className={`flex h-screen ${'dark' === 'dark' ? 'dark' : ''}`}>
+    <div
+      className={`flex h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}
+    >
       <Sidebar
         workspaces={workspaces}
+        workspaceMembers={workspaceMembers}
         activeWorkspace={activeWorkspace}
         setActiveWorkspace={setActiveWorkspace}
         theme={'dark'}
