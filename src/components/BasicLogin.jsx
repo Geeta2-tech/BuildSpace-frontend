@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../apis/authApi';
+import { useWorkspaces } from '../hooks/useWorkspaces';
 
 const InputField = ({
   label,
@@ -36,6 +37,7 @@ const BasicLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const { refetchWorkspaces } = useWorkspaces(); // Import refetchWorkspaces from context
   const navigate = useNavigate();
 
   const handleLogin = async () => {
@@ -43,6 +45,7 @@ const BasicLogin = () => {
       try {
         const response = await loginUser({ email, password }); // Make sure this sends credentials and uses `withCredentials: true`
         console.log('Login successful:', response);
+        await refetchWorkspaces(); // Refetch workspaces after login
         navigate('/home');
       } catch (error) {
         console.error('Login failed:', error);

@@ -18,6 +18,7 @@ import InviteMembersModal from './InviteMembersModal';
 
 const Sidebar = ({
   workspaces,
+  workspaceMembers,
   activeWorkspace,
   setActiveWorkspace,
   theme,
@@ -25,10 +26,17 @@ const Sidebar = ({
 }) => {
   const [showInviteModal, setShowInviteModal] = useState(false);
 
+  // Determine if the current user is the owner of the active workspace.
+  // This checks if the active workspace's ID can be found in the list of owned workspaces.
+  const isOwner = activeWorkspace
+    ? workspaces.owned.some((ws) => ws.id === activeWorkspace.id)
+    : false;
+
   return (
     <div className="w-64 bg-[rgba(0,0,0,0.87)] border-r border-gray-700 flex flex-col h-full">
       <WorkspaceSelector
         workspaces={workspaces}
+        workspaceMembers={workspaceMembers}
         activeWorkspace={activeWorkspace}
         setActiveWorkspace={setActiveWorkspace}
       />
@@ -101,14 +109,17 @@ const Sidebar = ({
 
       {/* Bottom Actions */}
       <div className="p-3 border-t border-gray-800 space-y-2">
-        <Button
-          variant="ghost"
-          className="w-full justify-start"
-          onClick={() => setShowInviteModal(true)}
-        >
-          <UserPlus className="w-4 h-4 mr-2" />
-          Invite members
-        </Button>
+        {/* The "Invite members" button is now conditionally rendered */}
+        {isOwner && (
+          <Button
+            variant="ghost"
+            className="w-full justify-start"
+            onClick={() => setShowInviteModal(true)}
+          >
+            <UserPlus className="w-4 h-4 mr-2" />
+            Invite members
+          </Button>
+        )}
         <div className="flex items-center justify-between">
           <Button variant="ghost" size="sm">
             <Settings className="w-4 h-4" />
@@ -126,8 +137,8 @@ const Sidebar = ({
         </div>
       </div>
 
-      {/* Invite Members Modal */}
-      {showInviteModal && (
+      {/* The Invite Members Modal is also conditionally rendered */}
+      {isOwner && showInviteModal && (
         <InviteMembersModal
           activeWorkspace={activeWorkspace}
           onClose={() => setShowInviteModal(false)}

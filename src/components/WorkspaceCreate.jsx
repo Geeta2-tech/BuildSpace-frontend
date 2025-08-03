@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { useWorkspaces } from '../hooks/WorkspaceContext';
+import { useWorkspaces } from '../hooks/useWorkspaces';
 import { createWorkspaceApi } from '../apis/workspaceApi';
 import { X } from 'lucide-react';
 

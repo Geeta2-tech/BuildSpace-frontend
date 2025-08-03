@@ -2,12 +2,17 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import Button from './Button';
 import api from '../utils/api';
+import toast from 'react-hot-toast';
+import { useWorkspaces } from '../hooks/useWorkspaces'; // Import the context hook
 
 const InviteMembersModal = ({ activeWorkspace, onClose }) => {
-  const [members, setMembers] = useState([]); // To store the added members with roles
+  const [members, setMembers] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [role, setRole] = useState('viewer');
-  const [status, setStatus] = useState([]); // Track the status of each member
+  const [status, setStatus] = useState([]);
+
+  // Get the refetch function from the context
+  const { refetchWorkspaceMembers } = useWorkspaces();
 
   const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -38,15 +43,25 @@ const InviteMembersModal = ({ activeWorkspace, onClose }) => {
         },
       });
 
-      // Update the status of each member based on response
-      const results = response.map((result, index) => ({
-        email: members[index].email,
-        status: result.status, // 'added', 'already_member', 'user_not_found'
-      }));
+      console.log('Invite response:', response);
 
-      setStatus(results);
+      // Assuming the response key is 'member' as in your original code
+      if (response && response.member) {
+        const results = response.member.map((result, index) => ({
+          email: members[index].email,
+          status: result.status,
+          role: members[index].role,
+        }));
+        setStatus(results);
+      }
+
       toast.success('Invite process completed!');
-      onClose(); // Close the modal after processing the invites
+
+      // **MODIFICATION**: Refetch the members to update the UI
+      await refetchWorkspaceMembers();
+
+      // Close the modal after everything is done
+      onClose();
     } catch (err) {
       console.error('Error inviting members:', err);
       toast.error('Failed to invite members.');
@@ -111,7 +126,9 @@ const InviteMembersModal = ({ activeWorkspace, onClose }) => {
             <div className="space-y-2">
               {status.map((result, index) => (
                 <div key={index} className="text-sm">
-                  <span>{result.email}</span>
+                  <span>
+                    {result.email} ({result.role})
+                  </span>
                   <span
                     className={`ml-2 text-xs ${
                       result.status === 'added'
@@ -122,8 +139,8 @@ const InviteMembersModal = ({ activeWorkspace, onClose }) => {
                     {result.status === 'added'
                       ? 'Successfully added'
                       : result.status === 'already_member'
-                      ? 'Already a member'
-                      : 'User not found'}
+                        ? 'Already a member'
+                        : 'User not found'}
                   </span>
                 </div>
               ))}
