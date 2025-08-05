@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Import Link
 import { loginUser } from '../apis/authApi';
 import { useWorkspaces } from '../hooks/useWorkspaces';
+import toast from 'react-hot-toast';
 
 const InputField = ({
   label,
@@ -37,17 +38,19 @@ const BasicLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const { refetchWorkspaces } = useWorkspaces(); // Import refetchWorkspaces from context
+  const { refetchWorkspaces } = useWorkspaces();
   const navigate = useNavigate();
 
   const handleLogin = async () => {
     if (email && password) {
       try {
-        const response = await loginUser({ email, password }); // Make sure this sends credentials and uses `withCredentials: true`
+        const response = await loginUser({ email, password });
         console.log('Login successful:', response);
+        toast.success('Login successful!');
         await refetchWorkspaces(); // Refetch workspaces after login
         navigate('/home');
       } catch (error) {
+        toast.error('Login failed. Please check your credentials.');
         console.error('Login failed:', error);
       }
     }
@@ -63,7 +66,7 @@ const BasicLogin = () => {
       />
       <InputField
         label="Password"
-        type="text"
+        type="password" // Corrected type for password field
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         showToggle
@@ -77,6 +80,17 @@ const BasicLogin = () => {
       >
         Log In
       </button>
+
+      {/* **NEW**: Link to the registration page */}
+      <div className="text-center mt-4 text-sm">
+        <span className="text-gray-600">Don't have an account? </span>
+        <Link
+          to="/register"
+          className="font-medium text-blue-600 hover:underline"
+        >
+          Register
+        </Link>
+      </div>
     </div>
   );
 };

@@ -8,6 +8,8 @@ import WorkspaceCreate from './components/WorkspaceCreate';
 import { WorkspaceProvider } from './hooks/WorkspaceContext';
 import Landing from './pages/Landing';
 import Register from './pages/Register';
+import JoinWorkspacePage from './pages/JoinWorkspacePage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -19,9 +21,23 @@ function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/home" element={<NotionClone />} />
-            <Route path="/createworkspace" element={<WorkspaceCreate />} />
-            {/* <Route path="/signup" element={<Home />} /> */}
+            <Route path="/join-workspace" element={<JoinWorkspacePage />} />
+            <Route
+              path="/home"
+              element={
+                <ProtectedRoute>
+                  <NotionClone />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/createworkspace"
+              element={
+                <ProtectedRoute>
+                  <WorkspaceCreate />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </WorkspaceProvider>
       </Router>
