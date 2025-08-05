@@ -10,15 +10,48 @@ const Landing = () => {
             Notion
           </div>
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">Mail</a>
-            <a href="#" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">Calendar</a>
-            <a href="#" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">AI</a>
-            <a href="#" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">Enterprise</a>
-            <a href="#" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">Pricing</a>
+            <a
+              href="#"
+              className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
+            >
+              Mail
+            </a>
+            <a
+              href="#"
+              className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
+            >
+              Calendar
+            </a>
+            <a
+              href="#"
+              className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
+            >
+              AI
+            </a>
+            <a
+              href="#"
+              className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
+            >
+              Enterprise
+            </a>
+            <a
+              href="#"
+              className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
+            >
+              Pricing
+            </a>
           </div>
           <div className="flex items-center space-x-4">
-            <a href="/login" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">Log in</a>
-            <a href="#" className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all">
+            <a
+              href="/login"
+              className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
+            >
+              Log in
+            </a>
+            <a
+              href="#"
+              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all"
+            >
               Get Notion free
             </a>
           </div>
@@ -36,12 +69,15 @@ const Landing = () => {
 
         <div className="text-center px-8 relative z-10 max-w-5xl mx-auto pt-20">
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 bg-gradient-to-r from-gray-800 via-purple-600 to-blue-600 bg-clip-text text-transparent leading-tight">
-            The AI workspace<br />that works for you.
+            The AI workspace
+            <br />
+            that works for you.
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
-            One place where teams find every answer, automate the busywork, and get projects done.
+            One place where teams find every answer, automate the busywork, and
+            get projects done.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-xl hover:-translate-y-1 transition-all">
               Get Notion free
@@ -103,7 +139,8 @@ const Landing = () => {
                 Perfect notes every time.
               </h3>
               <p className="text-gray-600">
-                Never miss important details with AI-powered meeting transcription and summarization.
+                Never miss important details with AI-powered meeting
+                transcription and summarization.
               </p>
             </div>
 
@@ -121,7 +158,8 @@ const Landing = () => {
                 One search for everything.
               </h3>
               <p className="text-gray-600">
-                Find any document, conversation, or insight across your entire workspace instantly.
+                Find any document, conversation, or insight across your entire
+                workspace instantly.
               </p>
             </div>
           </div>

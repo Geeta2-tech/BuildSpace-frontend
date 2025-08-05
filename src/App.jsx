@@ -13,8 +13,8 @@ function App() {
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />
-      <WorkspaceProvider>
-        <Router>
+      <Router>
+        <WorkspaceProvider>
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/register" element={<Register />} />
@@ -23,8 +23,8 @@ function App() {
             <Route path="/createworkspace" element={<WorkspaceCreate />} />
             <Route path="/editor" element={<RealTimeEditor />} />
           </Routes>
-        </Router>
-      </WorkspaceProvider>
+        </WorkspaceProvider>
+      </Router>
     </>
   );
 }

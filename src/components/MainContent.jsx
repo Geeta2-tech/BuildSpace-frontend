@@ -30,10 +30,12 @@ const MainContent = ({ recentPages, workspaceTitle, workspaceId }) => {
     );
   }
 
+
   return (
     <div className="flex-1 p-6 bg-[#191919]">
       {/* Display the workspace title */}
       <h1 className="text-3xl font-semibold text-white">{workspaceTitle}</h1>
+
       
       {/* Recent Pages Section */}
       <div className="mt-6">
@@ -49,6 +51,7 @@ const MainContent = ({ recentPages, workspaceTitle, workspaceId }) => {
             <span className="text-white ml-2">New Page</span>
           </div>
         </div>
+
       </div>
     </div>
   );
