@@ -1,6 +1,8 @@
 import { useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import MainContent from '../components/MainContent';
+import PageEditor from '../components/PageEditor'; // Import PageEditor
 import { useTheme } from '../hooks/useTheme';
 import { useWorkspaces } from '../hooks/WorkspaceContext';
 import { usePages } from '../hooks/usePages';
@@ -8,7 +10,28 @@ import { usePages } from '../hooks/usePages';
 const Home = () => {
   const { theme = 'light', toggleTheme } = useTheme();
   const { workspaces, activeWorkspace, setActiveWorkspace } = useWorkspaces();
-  const { recentPages } = usePages();
+  // Pass the activeWorkspace.id to usePages hook
+  const { recentPages, loading, error } = usePages(activeWorkspace?.id);
+  
+  // Add state for selected page
+  const [selectedPage, setSelectedPage] = useState(null);
+
+  // Handle page selection from sidebar
+  const handlePageSelect = (page) => {
+    setSelectedPage(page);
+  };
+
+  // Handle closing page editor
+  const handleCloseEditor = () => {
+    setSelectedPage(null);
+  };
+
+  // Handle page updated
+  const handlePageUpdated = (updatedPage) => {
+    // You might want to refresh the pages list here
+    // or update the specific page in the list
+    setSelectedPage(null);
+  };
 
   return (
     <div className={`flex h-screen ${'dark' === 'dark' ? 'dark' : ''}`}>
@@ -18,12 +41,27 @@ const Home = () => {
         setActiveWorkspace={setActiveWorkspace}
         theme={'dark'}
         toggleTheme={toggleTheme}
+        // Pass pages data to sidebar
+        pages={recentPages}
+        pagesLoading={loading}
+        pagesError={error}
+        // Add page selection handler
+        onPageSelect={handlePageSelect}
       />
-      {activeWorkspace ? (
+      
+      {/* Conditionally render PageEditor or MainContent */}
+      {selectedPage ? (
+        <PageEditor
+          selectedPage={selectedPage}
+          workspaceId={activeWorkspace?.id}
+          onCancel={handleCloseEditor}
+          onPageUpdated={handlePageUpdated}
+        />
+      ) : activeWorkspace ? (
         <MainContent
           recentPages={recentPages}
-          theme={'dark'}
           workspaceTitle={activeWorkspace.name}
+          workspaceId={activeWorkspace.id}
         />
       ) : (
         <div className="flex items-center justify-center w-full text-center text-gray-500 mt-20">

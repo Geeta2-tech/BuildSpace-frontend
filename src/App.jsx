@@ -21,7 +21,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/home" element={<NotionClone />} />
             <Route path="/createworkspace" element={<WorkspaceCreate />} />
-            {/* <Route path="/signup" element={<Home />} /> */}
+            <Route path="/editor" element={<RealTimeEditor />} />
           </Routes>
         </Router>
       </WorkspaceProvider>

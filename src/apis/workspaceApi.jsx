@@ -29,13 +29,4 @@ const getAllWorkspaces = async () => {
   }
 };
 
-// Example usage
-export const handleWorkspaceCreation = async () => {
-  try {
-    await createWorkspace('My New Workspace');
-  } catch (error) {
-    console.error('Failed to create workspace:', error);
-  }
-};
-
 export { createWorkspaceApi, getAllWorkspaces };
