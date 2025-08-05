@@ -123,7 +123,7 @@ const Register = () => {
           />
           <InputField
             label="Password"
-            type="password"
+            type="text"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             showToggle
@@ -132,7 +132,7 @@ const Register = () => {
           />
           <InputField
             label="Confirm Password"
-            type="password"
+            type="text"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             showToggle
