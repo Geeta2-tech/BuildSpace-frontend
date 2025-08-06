@@ -12,7 +12,7 @@ const UserProfileMenu = ({ currentUser, onProfileClick, onDropdownClick }) => {
         {' '}
         {/* pointer-events-none to ensure parent div gets the click */}
         <Avatar className="bg-indigo-500">
-          {currentUser?.name?.charAt(0) || 'U'}
+          <img src={`${import.meta.env.VITE_API_URL}${currentUser?.avatar}`} />
         </Avatar>
         <div className="text-white text-sm font-medium truncate">
           {currentUser?.name || 'User'}
