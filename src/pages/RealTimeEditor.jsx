@@ -14,19 +14,21 @@ const RealTimeEditor = ({ pageId = 1, blockId = null }) => {
     socket.onopen = () => {
       console.log('Connected to WebSocket');
       setIsConnected(true);
-      
+
       // Join the page session - load existing data for this page
-      socket.send(JSON.stringify({
-        type: 'join',
-        pageId: pageId,
-        blockId: blockId
-      }));
+      socket.send(
+        JSON.stringify({
+          type: 'join',
+          pageId: pageId,
+          blockId: blockId,
+        })
+      );
     };
 
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        
+
         switch (data.type) {
           case 'initial_data':
             // Load existing data and block ID
@@ -35,14 +37,14 @@ const RealTimeEditor = ({ pageId = 1, blockId = null }) => {
               setCurrentBlockId(data.blockId);
             }
             break;
-            
+
           case 'text_update':
             setText(data.content);
             if (data.blockId && !currentBlockId) {
               setCurrentBlockId(data.blockId);
             }
             break;
-            
+
           default:
             // Handle plain text messages (backward compatibility)
             if (typeof event.data === 'string') {
@@ -93,12 +95,14 @@ const RealTimeEditor = ({ pageId = 1, blockId = null }) => {
     // Debounce the WebSocket send to avoid too many requests
     debounceRef.current = setTimeout(() => {
       if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({
-          type: 'text_update',
-          content: newText,
-          pageId: pageId,
-          blockId: currentBlockId
-        }));
+        ws.send(
+          JSON.stringify({
+            type: 'text_update',
+            content: newText,
+            pageId: pageId,
+            blockId: currentBlockId,
+          })
+        );
       }
     }, 300); // 300ms debounce
   };
@@ -106,7 +110,9 @@ const RealTimeEditor = ({ pageId = 1, blockId = null }) => {
   return (
     <div className="p-5 font-sans">
       <div className="flex justify-between items-center mb-2.5 p-2.5 bg-gray-100 rounded-md">
-        <span className={`font-bold ${isConnected ? 'text-green-500' : 'text-red-500'}`}>
+        <span
+          className={`font-bold ${isConnected ? 'text-green-500' : 'text-red-500'}`}
+        >
           {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
         </span>
         <div className="text-sm text-gray-600">
@@ -116,7 +122,7 @@ const RealTimeEditor = ({ pageId = 1, blockId = null }) => {
           )}
         </div>
       </div>
-      
+
       <textarea
         value={text}
         onChange={handleTextChange}

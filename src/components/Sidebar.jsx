@@ -35,12 +35,8 @@ const Sidebar = ({
   const [showPrivatePages, setShowPrivatePages] = useState(true);
   // Add state to manage the visibility of workspace pages when "All Pages" is clicked
   const [showAllPages, setShowAllPages] = useState(false);
-  
-  const SIDEBAR_ITEMS = [
-    
-    { icon: FileText, label: "All Pages", active: false },
-  
-  ];
+
+  const SIDEBAR_ITEMS = [{ icon: FileText, label: 'All Pages', active: false }];
 
   // Determine if the current user is the owner of the active workspace.
   // This checks if the active workspace's ID can be found in the list of owned workspaces.
@@ -76,7 +72,7 @@ const Sidebar = ({
             <div
               key={index}
               className={`flex items-center space-x-3 px-3 py-2 rounded-md cursor-pointer ${
-                (item.label === "All Pages" && showAllPages) || item.active
+                (item.label === 'All Pages' && showAllPages) || item.active
                   ? 'bg-gray-800 text-white'
                   : 'text-gray-300 hover:bg-gray-700'
               }`}
@@ -102,7 +98,9 @@ const Sidebar = ({
             {pagesLoading ? (
               <div className="flex items-center justify-center py-4">
                 <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
-                <span className="text-xs text-gray-400 ml-2">Loading pages...</span>
+                <span className="text-xs text-gray-400 ml-2">
+                  Loading pages...
+                </span>
               </div>
             ) : pagesError ? (
               <div className="px-3 py-2 text-xs text-red-400">
@@ -132,8 +130,6 @@ const Sidebar = ({
             )}
           </div>
         )}
-
-        
       </div>
 
       {/* Bottom Actions */}

@@ -28,7 +28,6 @@ const getAllWorkspaces = async () => {
   }
 };
 
-
 const getAllWorkspaceMembers = async (workspaceId) => {
   try {
     const response = await api.get({
@@ -72,4 +71,3 @@ export {
   removeAMember,
   deleteWorkspace,
 };
-

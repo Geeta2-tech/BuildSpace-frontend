@@ -11,7 +11,7 @@ const PageEditor = ({
   onCancel,
   workspaceId,
   selectedPage = null,
-  onPageUpdated
+  onPageUpdated,
 }) => {
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
@@ -59,7 +59,10 @@ const PageEditor = ({
   useEffect(() => {
     if (!contentRef.current || isLoading) return;
 
-    if (editorInstance.current && typeof editorInstance.current.destroy === 'function') {
+    if (
+      editorInstance.current &&
+      typeof editorInstance.current.destroy === 'function'
+    ) {
       editorInstance.current.destroy();
       setIsEditorReady(false);
     }
@@ -75,13 +78,13 @@ const PageEditor = ({
           throw new Error('Not Editor.js format');
         }
       } catch (e) {
-        const lines = content.split('\n').filter(line => line.trim() !== '');
+        const lines = content.split('\n').filter((line) => line.trim() !== '');
         if (lines.length > 0) {
           editorData = {
-            blocks: lines.map(line => ({
+            blocks: lines.map((line) => ({
               type: 'paragraph',
-              data: { text: line.trim() }
-            }))
+              data: { text: line.trim() },
+            })),
           };
         }
       }
@@ -90,7 +93,10 @@ const PageEditor = ({
     editorInstance.current = new EditorJS({
       holder: contentRef.current,
       // Only show placeholder if there's no content
-      placeholder: editorData.blocks && editorData.blocks.length > 0 ? '' : 'Start writing...',
+      placeholder:
+        editorData.blocks && editorData.blocks.length > 0
+          ? ''
+          : 'Start writing...',
       tools: {
         header: Header,
         list: List,
@@ -105,12 +111,14 @@ const PageEditor = ({
             const jsonString = JSON.stringify(outputData);
 
             const pageId = isEditMode ? currentPage.id : `new-${Date.now()}`;
-            ws.send(JSON.stringify({
-              type: 'text_update',
-              content: jsonString,
-              pageId: pageId,
-              blockId: currentBlockId
-            }));
+            ws.send(
+              JSON.stringify({
+                type: 'text_update',
+                content: jsonString,
+                pageId: pageId,
+                blockId: currentBlockId,
+              })
+            );
           } catch (error) {
             console.error('Error getting editor data for WS:', error);
           }
@@ -125,11 +133,14 @@ const PageEditor = ({
             placeholder.style.display = 'none';
           }
         }
-      }
+      },
     });
 
     return () => {
-      if (editorInstance.current && typeof editorInstance.current.destroy === 'function') {
+      if (
+        editorInstance.current &&
+        typeof editorInstance.current.destroy === 'function'
+      ) {
         editorInstance.current.destroy();
       }
     };
@@ -143,10 +154,17 @@ const PageEditor = ({
       const outputData = await editorInstance.current.save();
       const contentJson = JSON.stringify(outputData);
 
-      await updatePage(currentPage.id, { title: title.trim(), content: contentJson });
+      await updatePage(currentPage.id, {
+        title: title.trim(),
+        content: contentJson,
+      });
 
       setContent(contentJson);
-      const updatedPage = { ...currentPage, title: title.trim(), content: contentJson };
+      const updatedPage = {
+        ...currentPage,
+        title: title.trim(),
+        content: contentJson,
+      };
       if (createdPageData) {
         setCreatedPageData(updatedPage);
       }
@@ -196,12 +214,14 @@ const PageEditor = ({
       setIsConnected(true);
 
       const pageId = isEditMode ? currentPage.id : `new-${Date.now()}`;
-      socket.send(JSON.stringify({
-        type: 'join',
-        pageId: pageId,
-        blockId: currentBlockId,
-        isNewPage: !isEditMode
-      }));
+      socket.send(
+        JSON.stringify({
+          type: 'join',
+          pageId: pageId,
+          blockId: currentBlockId,
+          isNewPage: !isEditMode,
+        })
+      );
     };
 
     socket.onmessage = (event) => {
@@ -236,7 +256,7 @@ const PageEditor = ({
                 }
               }
             }
-            
+
             if (data.blockId && !currentBlockId) {
               setCurrentBlockId(data.blockId);
             }
@@ -292,12 +312,14 @@ const PageEditor = ({
 
     if (ws && ws.readyState === WebSocket.OPEN) {
       const pageId = isEditMode ? currentPage.id : `new-${Date.now()}`;
-      ws.send(JSON.stringify({
-        type: 'title_update',
-        title: newTitle,
-        pageId: pageId,
-        blockId: currentBlockId
-      }));
+      ws.send(
+        JSON.stringify({
+          type: 'title_update',
+          title: newTitle,
+          pageId: pageId,
+          blockId: currentBlockId,
+        })
+      );
     }
   };
 
@@ -326,17 +348,24 @@ const PageEditor = ({
             <span className="text-gray-500 text-sm">
               {isEditMode ? 'Editing page' : 'New page'}
             </span>
-            
-            <span className={`text-sm ${isEditorReady ? 'text-blue-400' : 'text-gray-500'}`}>
+
+            <span
+              className={`text-sm ${isEditorReady ? 'text-blue-400' : 'text-gray-500'}`}
+            >
               {isEditorReady ? '' : '⏳ Loading Editor'}
             </span>
           </div>
           <div className="flex items-center space-x-3">
             <span className="text-gray-400 text-sm">
-              {saveStatus || (isEditMode ? 'Press Ctrl+S to save' : 'Type title to create page')}
+              {saveStatus ||
+                (isEditMode
+                  ? 'Press Ctrl+S to save'
+                  : 'Type title to create page')}
             </span>
             <div className="text-xs text-gray-500">
-              <span className="ml-3">Content: {content ? 'Loaded' : 'Empty'}</span>
+              <span className="ml-3">
+                Content: {content ? 'Loaded' : 'Empty'}
+              </span>
             </div>
           </div>
         </div>
@@ -353,7 +382,7 @@ const PageEditor = ({
             style={{
               fontSize: '3rem',
               lineHeight: '1.2',
-              minHeight: '4rem'
+              minHeight: '4rem',
             }}
           />
 
@@ -362,7 +391,7 @@ const PageEditor = ({
               ref={contentRef}
               style={{
                 minHeight: '400px',
-                lineHeight: '1.6'
+                lineHeight: '1.6',
               }}
               className="text-white"
             />
@@ -370,8 +399,9 @@ const PageEditor = ({
         </div>
 
         {/* Dark theme styles for Editor.js */}
-        <style dangerouslySetInnerHTML={{
-  __html: `
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
     /* Hide empty state when content exists */
     .codex-editor--empty {
       display: ${content ? 'none' : 'block'} !important;
@@ -492,8 +522,9 @@ const PageEditor = ({
     [class*="--focused"] {
       box-shadow: 0 0 0 2px #3b82f6 !important;
     }
-  `
-}} />
+  `,
+          }}
+        />
       </div>
     </div>
   );
