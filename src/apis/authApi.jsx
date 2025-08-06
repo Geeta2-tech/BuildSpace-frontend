@@ -95,7 +95,7 @@ const getCurrentUserApi = async () => {
 
 const sendEmailVerification = async () => {
   try {
-    const response = await api.post({
+    const response = await api.get({
       endpoint: '/auth/send-verification',
     });
     return response;
@@ -117,6 +117,44 @@ const verifyEmail = async (token) => {
   }
 };
 
+const forgotPassword = async (email) => {
+  try {
+    const response = await api.post({
+      endpoint: '/auth/forgot-password',
+      data: { email },
+    });
+    return response;
+  } catch (error) {
+    console.error('Error forgot password:', error);
+    throw error;
+  }
+};
+
+const resetPassword = async (token, newPassword) => {
+  try {
+    const response = await api.post({
+      endpoint: '/auth/reset-password',
+      data: { token, newPassword },
+    });
+    return response;
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    throw error;
+  }
+};
+
+const deleteUser = async () => {
+  try {
+    const response = await api.delete({
+      endpoint: '/auth/delete-user',
+    });
+    return response;
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    throw error;
+  }
+};
+
 export {
   sendVerificationCode,
   verifyCodeAndRegister,
@@ -126,4 +164,7 @@ export {
   getCurrentUserApi,
   sendEmailVerification,
   verifyEmail,
+  forgotPassword,
+  resetPassword,
+  deleteUser,
 };
