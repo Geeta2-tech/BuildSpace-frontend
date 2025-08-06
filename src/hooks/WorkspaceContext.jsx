@@ -1,11 +1,25 @@
-import { createContext, useState, useEffect, useCallback } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   getAllWorkspaceMembers,
   getAllWorkspaces,
-  deleteWorkspace as deleteWorkspaceApi,
+  deleteWorkspaceApi,
+  getPendingInvitationsApi,
+  acceptInvitationApi,
+  declineInvitationApi,
+  removeAMember,
+  createWorkspaceApi,
 } from '../apis/workspaceApi';
-import { logoutUser as apiLogoutUser } from '../apis/authApi';
+import {
+  logoutUser as apiLogoutUser,
+  getCurrentUserApi,
+} from '../apis/authApi';
 import toast from 'react-hot-toast';
 
 const clearCookie = (name) => {
@@ -15,11 +29,13 @@ const clearCookie = (name) => {
 export const WorkspaceContext = createContext();
 
 export const WorkspaceProvider = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState(undefined);
   const [workspaces, setWorkspaces] = useState({
     owned: [],
     shared: [],
   });
   const [workspaceMembers, setWorkspaceMembers] = useState([]);
+  const [pendingInvitations, setPendingInvitations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeWorkspace, setActiveWorkspace] = useState(null);
   const navigate = useNavigate();
@@ -36,6 +52,8 @@ export const WorkspaceProvider = ({ children }) => {
       setWorkspaces({ owned: [], shared: [] });
       setActiveWorkspace(null);
       setWorkspaceMembers([]);
+      setCurrentUser(null);
+      setPendingInvitations([]);
       clearCookie('accessToken');
       clearCookie('refreshToken');
       localStorage.removeItem('lastActiveWorkspaceId');
@@ -44,28 +62,57 @@ export const WorkspaceProvider = ({ children }) => {
   }, [navigate]);
 
   const fetchWorkspaces = useCallback(async () => {
-    setLoading(true);
     try {
       const response = await getAllWorkspaces();
       setWorkspaces(response);
-
       const lastActiveId = localStorage.getItem('lastActiveWorkspaceId');
       if (lastActiveId) {
         const allWorkspaces = [...response.owned, ...response.shared];
-        const lastActive = allWorkspaces.find((ws) => ws.id === lastActiveId);
+        const lastActive = allWorkspaces.find(
+          (ws) => ws.id === parseInt(lastActiveId)
+        );
         setActiveWorkspace(lastActive || response.owned[0] || null);
       } else {
         setActiveWorkspace(response.owned[0] || null);
       }
     } catch (err) {
       console.error('Error fetching workspaces:', err);
-      if (err.response && err.response.status === 401) {
-        logout();
-      }
-    } finally {
-      setLoading(false);
     }
-  }, [logout]);
+  }, []);
+
+  const fetchCurrentUser = useCallback(async () => {
+    try {
+      const user = await getCurrentUserApi();
+      setCurrentUser(user);
+      return user;
+    } catch (err) {
+      console.error('Error fetching current user:', err);
+      setCurrentUser(null);
+      return null;
+    }
+  }, []);
+
+  const fetchPendingInvitations = useCallback(async () => {
+    try {
+      const invitations = await getPendingInvitationsApi();
+      setPendingInvitations(invitations);
+    } catch (error) {
+      console.error('Failed to fetch pending invitations', error);
+    }
+  }, []);
+
+  const initializeSession = useCallback(async () => {
+    setLoading(true);
+    const user = await fetchCurrentUser();
+    if (user) {
+      await Promise.all([fetchWorkspaces(), fetchPendingInvitations()]);
+    }
+    setLoading(false);
+  }, [fetchCurrentUser, fetchWorkspaces, fetchPendingInvitations]);
+
+  useEffect(() => {
+    initializeSession();
+  }, [initializeSession]);
 
   const refetchWorkspaceMembers = useCallback(async () => {
     if (!activeWorkspace) return;
@@ -78,10 +125,6 @@ export const WorkspaceProvider = ({ children }) => {
   }, [activeWorkspace]);
 
   useEffect(() => {
-    fetchWorkspaces();
-  }, [fetchWorkspaces]);
-
-  useEffect(() => {
     if (activeWorkspace) {
       localStorage.setItem('lastActiveWorkspaceId', activeWorkspace.id);
       refetchWorkspaceMembers();
@@ -90,19 +133,35 @@ export const WorkspaceProvider = ({ children }) => {
     }
   }, [activeWorkspace, refetchWorkspaceMembers]);
 
-  // **NEW**: Function to handle workspace deletion
+  // **THE FIX**: Wrap this function in useCallback
+  const handleInvitationAction = useCallback(
+    async (token, action) => {
+      try {
+        if (action === 'accept') {
+          await acceptInvitationApi(token);
+          toast.success('Invitation accepted!');
+        } else {
+          await declineInvitationApi(token);
+          toast.success('Invitation declined.');
+        }
+        // After action, refetch everything to update the UI
+        await Promise.all([fetchWorkspaces(), fetchPendingInvitations()]);
+      } catch (error) {
+        toast.error(`Failed to ${action} invitation.`);
+        console.error(`Error handling invitation:`, error);
+      }
+    },
+    [fetchWorkspaces, fetchPendingInvitations]
+  ); // Add dependencies
+
   const deleteWorkspace = async (workspaceId) => {
     try {
       await deleteWorkspaceApi(workspaceId);
-
-      // Update local state after successful deletion
       const newWorkspaces = {
         ...workspaces,
         owned: workspaces.owned.filter((ws) => ws.id !== workspaceId),
       };
       setWorkspaces(newWorkspaces);
-
-      // If the deleted workspace was the active one, find a new active workspace
       if (activeWorkspace?.id === workspaceId) {
         const nextActive =
           newWorkspaces.owned[0] || newWorkspaces.shared[0] || null;
@@ -115,32 +174,57 @@ export const WorkspaceProvider = ({ children }) => {
     }
   };
 
-  const addWorkspace = (newWorkspace) => {
-    setWorkspaces((prev) => ({
-      ...prev,
-      owned: [...prev.owned, newWorkspace],
-    }));
-    setActiveWorkspace(newWorkspace);
+  const addWorkspace = async (name) => {
+    try {
+      const newWorkspace = await createWorkspaceApi(name);
+      setWorkspaces((prev) => ({
+        ...prev,
+        owned: [newWorkspace, ...prev.owned],
+      }));
+      setActiveWorkspace(newWorkspace);
+      toast.success('Workspace created successfully!');
+      return newWorkspace;
+    } catch (error) {
+      // toast.error('Failed to create workspace.');
+      console.error('Error creating workspace:', error);
+      throw error;
+    }
   };
 
-  const removeWorkspaceMember = (memberIdToRemove) => {
-    setWorkspaceMembers((currentMembers) =>
-      currentMembers.filter((member) => member.userId !== memberIdToRemove)
-    );
+  const removeWorkspaceMember = async (workspaceId, memberIdToRemove) => {
+    try {
+      await removeAMember(workspaceId, memberIdToRemove);
+      if (memberIdToRemove === currentUser?.id) {
+        toast.success('You have left the workspace.');
+        await fetchWorkspaces();
+      } else {
+        setWorkspaceMembers((currentMembers) =>
+          currentMembers.filter((member) => member.userId !== memberIdToRemove)
+        );
+        toast.success('Member removed successfully!');
+      }
+    } catch (error) {
+      toast.error('Failed to remove member.');
+      console.error('Error removing member:', error);
+    }
   };
 
   const value = {
+    currentUser,
+    fetchCurrentUser,
     workspaces,
     activeWorkspace,
     setActiveWorkspace,
     addWorkspace,
     loading,
     workspaceMembers,
+    pendingInvitations,
     removeWorkspaceMember,
     logout,
-    refetchWorkspaces: fetchWorkspaces,
+    initializeSession,
     refetchWorkspaceMembers,
-    deleteWorkspace, // Expose the delete function
+    deleteWorkspace,
+    handleInvitationAction,
   };
 
   return (
@@ -148,4 +232,12 @@ export const WorkspaceProvider = ({ children }) => {
       {children}
     </WorkspaceContext.Provider>
   );
+};
+
+export const useWorkspaces = () => {
+  const context = useContext(WorkspaceContext);
+  if (context === undefined) {
+    throw new Error('useWorkspaces must be used within a WorkspaceProvider');
+  }
+  return context;
 };

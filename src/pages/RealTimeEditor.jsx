@@ -52,6 +52,7 @@ const RealTimeEditor = ({ pageId = 1, blockId = null }) => {
             }
         }
       } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
         // Handle Blob or plain text messages
         if (event.data instanceof Blob) {
           const reader = new FileReader();

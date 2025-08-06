@@ -81,10 +81,49 @@ const logoutUser = async () => {
   }
 };
 
+const getCurrentUserApi = async () => {
+  try {
+    const response = await api.get({
+      endpoint: '/auth/get-current-user',
+    });
+    return response;
+  } catch (error) {
+    console.error('Error registering user:', error);
+    throw error;
+  }
+};
+
+const sendEmailVerification = async () => {
+  try {
+    const response = await api.post({
+      endpoint: '/auth/send-verification',
+    });
+    return response;
+  } catch (error) {
+    console.error('Error sending email verification:', error);
+    throw error;
+  }
+};
+
+const verifyEmail = async (token) => {
+  try {
+    const response = await api.get({
+      endpoint: `/auth/verify-email?token=${token}`,
+    });
+    return response;
+  } catch (error) {
+    console.error('Error verifying email:', error);
+    throw error;
+  }
+};
+
 export {
   sendVerificationCode,
   verifyCodeAndRegister,
   registerUser,
   loginUser,
   logoutUser,
+  getCurrentUserApi,
+  sendEmailVerification,
+  verifyEmail,
 };

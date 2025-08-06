@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Import Link
 import { Eye, EyeOff } from 'lucide-react';
 import { registerUser } from '../apis/authApi';
+import toast from 'react-hot-toast';
 
 const Logo = () => (
   <div className="w-8 h-8 bg-white">
@@ -74,30 +75,23 @@ const Register = () => {
   const navigate = useNavigate();
 
   const handleRegister = async () => {
-    if (
-      email &&
-      name &&
-      password &&
-      confirmPassword &&
-      password === confirmPassword
-    ) {
-      try {
-        const response = await registerUser({ email, name, password });
-        console.log('User registered:', response);
-        navigate('/login');
-      } catch (error) {
-        console.error('Error registering user:', error);
-      }
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match.');
+      return;
+    }
+
+    try {
+      const response = await registerUser({ email, name, password });
+      console.log('User registered:', response);
+      toast.success('Registration successful! Please log in.');
+      navigate('/login');
+    } catch (error) {
+      toast.error('Registration failed. Please try again.');
+      console.error('Error registering user:', error);
     }
   };
 
-  const isDisabled = !(
-    email &&
-    name &&
-    password &&
-    confirmPassword &&
-    password === confirmPassword
-  );
+  const isDisabled = !(email && name && password && confirmPassword);
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
@@ -142,6 +136,17 @@ const Register = () => {
             isVisible={confirmPasswordVisible}
           />
           <ContinueButton onClick={handleRegister} disabled={isDisabled} />
+        </div>
+
+        {/* **NEW**: Link to the login page */}
+        <div className="text-center text-sm">
+          <span className="text-gray-600">Already have an account? </span>
+          <Link
+            to="/login"
+            className="font-medium text-blue-600 hover:underline"
+          >
+            Log in
+          </Link>
         </div>
 
         <FooterLinks />

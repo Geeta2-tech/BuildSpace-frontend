@@ -1,101 +1,29 @@
 import { useState } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
-import { sendVerificationCode, verifyCodeAndRegister } from '../apis/authApi'; // Import your auth functions
 import { useNavigate } from 'react-router-dom';
+import { sendVerificationCode, verifyCodeAndRegister } from '../apis/authApi';
 import BasicLogin from '../components/BasicLogin';
+import { ArrowLeft } from 'lucide-react';
+import toast from 'react-hot-toast';
+
 // Logo Component
 const Logo = () => (
-  <div className="w-8 h-8 bg-white">
+  <div className="w-8 h-8 bg-white mx-auto">
     <img
       src="https://cdn-icons-png.flaticon.com/128/5436/5436830.png"
-      alt="logo"
+      alt="BuildSpace Logo"
     />
   </div>
 );
 
 // Social Login Button Component
-const SocialButton = ({ icon, text, onClick, isImage = false }) => (
+const SocialButton = ({ icon, text, onClick }) => (
   <button
     onClick={onClick}
     className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
   >
-    {isImage ? (
-      <img src={icon} alt="" className="w-5 h-5" />
-    ) : (
-      <span className="text-lg">{icon}</span>
-    )}
+    <span className="text-lg">{icon}</span>
     <span className="text-gray-700 font-medium">{text}</span>
-  </button>
-);
-
-// Email Input Component
-const EmailInput = ({ value, onChange, showVerification }) => (
-  <div className="space-y-2">
-    <label className="text-sm text-gray-600">Email</label>
-    <div className="relative">
-      <input
-        type="email"
-        value={value}
-        onChange={onChange}
-        placeholder="Enter your email address..."
-        disabled={showVerification}
-        className={`w-full px-3 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-          showVerification ? 'bg-gray-50 text-gray-600' : ''
-        }`}
-      />
-      {showVerification && (
-        <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
-          ✕
-        </button>
-      )}
-    </div>
-    {!showVerification && (
-      <p className="text-xs text-gray-500">
-        Use an organization email to easily collaborate with teammates.
-      </p>
-    )}
-  </div>
-);
-
-// Verification Code Input Component
-const VerificationInput = ({ value, onChange }) => (
-  <div className="space-y-2">
-    <label className="text-sm text-gray-600">Verification code</label>
-    <input
-      type="text"
-      value={value}
-      onChange={onChange}
-      placeholder="Enter code"
-      className="w-full px-3 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-    />
-    <p className="text-xs text-gray-500">We sent a code to your inbox</p>
-  </div>
-);
-
-// Resend Link Component
-const ResendLink = ({ onResend, countdown }) => (
-  <div className="text-center">
-    {countdown > 0 ? (
-      <span className="text-sm text-gray-500">Resend in {countdown}s</span>
-    ) : (
-      <button
-        onClick={onResend}
-        className="text-sm text-blue-600 hover:underline"
-      >
-        Resend code
-      </button>
-    )}
-  </div>
-);
-
-// Continue Button Component
-const ContinueButton = ({ onClick, disabled }) => (
-  <button
-    onClick={onClick}
-    disabled={disabled}
-    className="w-full bg-blue-600 text-white py-2.5 rounded-md font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-  >
-    Continue
   </button>
 );
 
@@ -115,150 +43,207 @@ const FooterLinks = () => (
 
 // Main Login Component
 const Login = () => {
+  const [loginView, setLoginView] = useState('default'); // 'default', 'basic', 'verify'
   const [email, setEmail] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
-  const [showVerification, setShowVerification] = useState(false);
   const [resendCountdown, setResendCountdown] = useState(0);
   const navigate = useNavigate();
+
   const handleSocialLogin = (provider) => {
     console.log(`Login with ${provider}`);
   };
 
+  const startResendTimer = () => {
+    setResendCountdown(30);
+    const interval = setInterval(() => {
+      setResendCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
   const handleEmailContinue = async () => {
-    if (email && !showVerification) {
-      // Send verification code if email is provided
-      try {
-        await sendVerificationCode(email); // Use the imported function
-        setShowVerification(true);
-        setResendCountdown(16);
-
-        // Start countdown for resend link
-        const interval = setInterval(() => {
-          setResendCountdown((prev) => {
-            if (prev <= 1) {
-              clearInterval(interval);
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
-      } catch (error) {
-        console.error('Error sending verification code:', error);
-      }
-    } else if (verificationCode && showVerification) {
-      // Verify code and register user
-      try {
-        console.log(verificationCode);
-        const response = await verifyCodeAndRegister(
-          email,
-          parseInt(verificationCode)
-        ); // Use the imported function
-        console.log('User registered successfully:', response);
-        navigate('./home');
-      } catch (error) {
-        console.error('Error verifying code and registering:', error);
-      }
-    }
-  };
-
-  const handleResendCode = async () => {
     try {
-      console.log(`Resend code to: ${email}`);
-      await sendVerificationCode(email); // Use the imported function
-      setResendCountdown(16);
-      const interval = setInterval(() => {
-        setResendCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+      await sendVerificationCode(email);
+      toast.success(`Verification code sent to ${email}`);
+      setLoginView('verify');
+      startResendTimer();
     } catch (error) {
-      console.error('Error resending verification code:', error);
+      toast.error('Failed to send verification code.');
+      console.error('Error sending verification code:', error);
     }
   };
 
-  const isButtonDisabled = showVerification ? !verificationCode : !email;
+  const handleVerifyCode = async () => {
+    try {
+      await verifyCodeAndRegister(email, parseInt(verificationCode));
+      toast.success('Login successful!');
+      navigate('/home');
+    } catch (error) {
+      toast.error('Invalid verification code.');
+      console.error('Error verifying code:', error);
+    }
+  };
+
+  // Renders the initial view with all login options
+  const renderDefaultView = () => (
+    <>
+      <div className="text-center mb-8">
+        <h1 className="text-2xl font-semibold text-black">
+          Welcome to BuildSpace
+        </h1>
+        <p className="text-gray-500 mt-2">
+          Log in or create an account to continue
+        </p>
+      </div>
+      <div className="space-y-3">
+        <GoogleLogin
+          onSuccess={(credentialResponse) => {
+            console.log(credentialResponse);
+            navigate('/home');
+          }}
+          onError={() => console.log('Login Failed')}
+        />
+        <SocialButton
+          icon="🚀"
+          text="Continue with Email/Password"
+          onClick={() => setLoginView('basic')}
+        />
+        <SocialButton
+          icon="👤"
+          text="Log in with passkey"
+          onClick={() => handleSocialLogin('Passkey')}
+        />
+        <SocialButton
+          icon="🔒"
+          text="Single sign-on (SSO)"
+          onClick={() => handleSocialLogin('SSO')}
+        />
+      </div>
+      <div className="relative flex py-5 items-center">
+        <div className="flex-grow border-t border-gray-200"></div>
+        <span className="flex-shrink mx-4 text-gray-400 text-xs uppercase">
+          Or
+        </span>
+        <div className="flex-grow border-t border-gray-200"></div>
+      </div>
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="email-input" className="sr-only">
+            Email
+          </label>
+          <input
+            id="email-input"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email address..."
+            className="w-full px-3 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+        <button
+          onClick={handleEmailContinue}
+          disabled={!email}
+          className="w-full bg-blue-600 text-white py-2.5 rounded-md font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        >
+          Continue with Email
+        </button>
+      </div>
+    </>
+  );
+
+  // Renders the view for email and password login
+  const renderBasicLoginView = () => (
+    <>
+      <button
+        onClick={() => setLoginView('default')}
+        className="flex items-center gap-2 text-sm text-gray-600 hover:text-black mb-6 transition-colors"
+      >
+        <ArrowLeft size={16} />
+        All login options
+      </button>
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">
+        Log in with Email
+      </h2>
+      <BasicLogin />
+    </>
+  );
+
+  // Renders the view for entering the verification code
+  const renderVerificationView = () => (
+    <>
+      <button
+        onClick={() => setLoginView('default')}
+        className="flex items-center gap-2 text-sm text-gray-600 hover:text-black mb-6 transition-colors"
+      >
+        <ArrowLeft size={16} />
+        Back to login options
+      </button>
+      <h2 className="text-xl font-semibold text-gray-800 mb-2">
+        Check your email
+      </h2>
+      <p className="text-gray-500 mb-4 text-sm">
+        We sent a verification code to <strong>{email}</strong>
+      </p>
+      <div className="space-y-4">
+        <input
+          type="text"
+          value={verificationCode}
+          onChange={(e) => setVerificationCode(e.target.value)}
+          placeholder="Enter code"
+          className="w-full px-3 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+        <button
+          onClick={handleVerifyCode}
+          disabled={!verificationCode}
+          className="w-full bg-blue-600 text-white py-2.5 rounded-md font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        >
+          Verify
+        </button>
+        <div className="text-center text-sm">
+          {resendCountdown > 0 ? (
+            <span className="text-gray-500">
+              Resend code in {resendCountdown}s
+            </span>
+          ) : (
+            <button
+              onClick={handleEmailContinue}
+              className="text-blue-600 hover:underline"
+            >
+              Resend code
+            </button>
+          )}
+        </div>
+      </div>
+    </>
+  );
+
+  const renderView = () => {
+    switch (loginView) {
+      case 'basic':
+        return renderBasicLoginView();
+      case 'verify':
+        return renderVerificationView();
+      default:
+        return renderDefaultView();
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
-      {/* Top Centered Header */}
-      <div className="mb-10 text-center space-y-3">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+      <div className="mb-8 text-center">
         <Logo />
-        <h1 className="text-2xl font-semibold text-black">
-          Think it. Make it.
-        </h1>
-        <p className="text-gray-500">Log in to your BuildSpace account</p>
       </div>
 
-      {/* Two-Column Login Area */}
-      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-[1fr_1px_1fr] bg-white shadow-lg border rounded-lg overflow-hidden">
-        {/* Left Section */}
-        <div className="p-8 space-y-6 md:col-span-1">
-          {/* Social Buttons */}
-          <div className="space-y-3">
-            <GoogleLogin
-              onSuccess={(credentialResponse) =>
-                console.log(credentialResponse)
-              }
-              onError={() => console.log('Login Failed')}
-            />
-            <SocialButton
-              icon="👤"
-              text="Log in with passkey"
-              onClick={() => handleSocialLogin('Passkey')}
-            />
-            <SocialButton
-              icon="🔒"
-              text="Single sign-on (SSO)"
-              onClick={() => handleSocialLogin('SSO')}
-            />
-          </div>
-
-          {/* Email Code Login */}
-          <div className="space-y-4">
-            <EmailInput
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              showVerification={showVerification}
-            />
-            {showVerification && (
-              <VerificationInput
-                value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)}
-              />
-            )}
-            <ContinueButton
-              onClick={handleEmailContinue}
-              disabled={isButtonDisabled}
-            />
-            {showVerification && (
-              <ResendLink
-                onResend={handleResendCode}
-                countdown={resendCountdown}
-              />
-            )}
-          </div>
-        </div>
-
-        {/* Vertical Separator */}
-        <div className="hidden md:flex justify-center items-stretch bg-gray-200 w-px">
-          <div className="h-5/6 w-px bg-gray-200"></div>
-        </div>
-
-        {/* Right Section */}
-        <div className="p-8 md:col-span-1">
-          <h2 className="text-center text-lg font-semibold text-gray-800 mb-4">
-            Login with Email & Password
-          </h2>
-          <BasicLogin />
-        </div>
+      <div className="w-full max-w-sm bg-white shadow-lg border rounded-lg p-8">
+        {renderView()}
       </div>
 
-      {/* Footer */}
-      <div className="mt-6">
+      <div className="mt-6 w-full max-w-sm">
         <FooterLinks />
       </div>
     </div>

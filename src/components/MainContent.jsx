@@ -4,7 +4,6 @@ import NewPageEditor from './PageEditor'; // Import the new editor component
 
 const MainContent = ({ recentPages, workspaceTitle, workspaceId }) => {
   const [showNewPageEditor, setShowNewPageEditor] = useState(false);
-  console.log('activeWorkspace', workspaceId);
   const handleNewPageClick = () => {
     setShowNewPageEditor(true);
   };
