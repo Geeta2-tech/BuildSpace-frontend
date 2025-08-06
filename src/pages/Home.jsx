@@ -11,7 +11,7 @@ import { usePages } from '../hooks/usePages';
 const Home = () => {
   const { theme = 'light', toggleTheme } = useTheme();
 
-  const { workspaces, activeWorkspace, setActiveWorkspace } = useWorkspaces();
+  const { workspaces, activeWorkspace, setActiveWorkspace ,workspaceMembers} = useWorkspaces();
   // Pass the activeWorkspace.id to usePages hook
   const { recentPages, loading, error } = usePages(activeWorkspace?.id);
   
@@ -34,11 +34,6 @@ const Home = () => {
     // or update the specific page in the list
     setSelectedPage(null);
   };
-
-  const { workspaces, activeWorkspace, setActiveWorkspace, workspaceMembers } =
-    useWorkspaces();
-  const { recentPages } = usePages();
-
 
   return (
     <div
