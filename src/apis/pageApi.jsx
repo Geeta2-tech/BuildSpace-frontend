@@ -88,5 +88,5 @@ export {
   getPageById,
   getPagesByWorkspaceId,
   updatePage,
-  deletePage
+  deletePage,
 };

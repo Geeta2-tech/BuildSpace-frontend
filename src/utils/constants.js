@@ -6,4 +6,3 @@ export const SIDEBAR_ITEMS = [
   { icon: Star, label: 'Favorites' },
   { icon: Trash2, label: 'Trash' },
 ];
-

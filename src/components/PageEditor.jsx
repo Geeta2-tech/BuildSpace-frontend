@@ -1,18 +1,10 @@
-const handleCancel = () => {
-    // If we created a page during this session, notify parent about it
-    if (createdPageData && onPageCreated) {
-      onPageCreated(createdPageData.title);
-    }
-    onCancel && onCancel();
-  };import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { createPage, updatePage, getPageById } from '../apis/pageApi';
 
-const PageEditor = ({ 
-  onPageCreated, 
-  onCancel, 
-  workspaceId, 
+const PageEditor = ({
+  workspaceId,
   selectedPage = null, // Add selectedPage prop for editing existing pages
-  onPageUpdated 
+  onPageUpdated,
 }) => {
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
@@ -70,21 +62,23 @@ const PageEditor = ({
     socket.onopen = () => {
       console.log('Connected to WebSocket');
       setIsConnected(true);
-      
+
       // Join the page session
       const pageId = isEditMode ? currentPage.id : `new-${Date.now()}`; // Use timestamp for new pages
-      socket.send(JSON.stringify({
-        type: 'join',
-        pageId: pageId,
-        blockId: currentBlockId,
-        isNewPage: !isEditMode
-      }));
+      socket.send(
+        JSON.stringify({
+          type: 'join',
+          pageId: pageId,
+          blockId: currentBlockId,
+          isNewPage: !isEditMode,
+        })
+      );
     };
 
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        
+
         switch (data.type) {
           case 'initial_data':
             // Load existing data and block ID (only for edit mode)
@@ -95,18 +89,18 @@ const PageEditor = ({
               }
             }
             break;
-            
+
           case 'text_update':
             setContent(data.content);
             if (data.blockId && !currentBlockId) {
               setCurrentBlockId(data.blockId);
             }
             break;
-            
+
           case 'title_update':
             setTitle(data.title);
             break;
-            
+
           default:
             // Handle plain text messages (backward compatibility)
             if (typeof event.data === 'string') {
@@ -191,12 +185,14 @@ const PageEditor = ({
     // WebSocket real-time update for title
     if (ws && ws.readyState === WebSocket.OPEN) {
       const pageId = isEditMode ? currentPage.id : `new-${Date.now()}`;
-      ws.send(JSON.stringify({
-        type: 'title_update',
-        title: newTitle,
-        pageId: pageId,
-        blockId: currentBlockId
-      }));
+      ws.send(
+        JSON.stringify({
+          type: 'title_update',
+          title: newTitle,
+          pageId: pageId,
+          blockId: currentBlockId,
+        })
+      );
     }
   };
 
@@ -213,8 +209,15 @@ const PageEditor = ({
 
       debounceRef.current = setTimeout(async () => {
         try {
-          await updatePage(currentPage.id, { title: title.trim(), content: newContent });
-          const updatedPage = { ...currentPage, title: title.trim(), content: newContent };
+          await updatePage(currentPage.id, {
+            title: title.trim(),
+            content: newContent,
+          });
+          const updatedPage = {
+            ...currentPage,
+            title: title.trim(),
+            content: newContent,
+          };
           if (createdPageData) {
             setCreatedPageData(updatedPage);
           }
@@ -228,19 +231,21 @@ const PageEditor = ({
     // WebSocket real-time update for content
     if (ws && ws.readyState === WebSocket.OPEN) {
       const pageId = isEditMode ? currentPage.id : `new-${Date.now()}`;
-      ws.send(JSON.stringify({
-        type: 'text_update',
-        content: newContent,
-        pageId: pageId,
-        blockId: currentBlockId
-      }));
+      ws.send(
+        JSON.stringify({
+          type: 'text_update',
+          content: newContent,
+          pageId: pageId,
+          blockId: currentBlockId,
+        })
+      );
     }
   };
 
   const handleKeyDown = (e) => {
     // Cancel on Escape
     if (e.key === 'Escape') {
-      handleCancel();
+      console.log('Escape pressed, closing editor');
     }
   };
 
@@ -270,7 +275,9 @@ const PageEditor = ({
               {isEditMode ? 'Editing page' : 'New page'}
             </span>
             {/* WebSocket connection status */}
-            <span className={`text-sm ${isConnected ? 'text-green-400' : 'text-red-400'}`}>
+            <span
+              className={`text-sm ${isConnected ? 'text-green-400' : 'text-red-400'}`}
+            >
               {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
             </span>
           </div>
@@ -278,7 +285,11 @@ const PageEditor = ({
             {/* Auto-save status */}
             {!isEditMode && (
               <span className="text-gray-400 text-sm">
-                {isSaving ? 'Creating page...' : isAutoSaved ? 'Page created' : 'Type title to create page'}
+                {isSaving
+                  ? 'Creating page...'
+                  : isAutoSaved
+                    ? 'Page created'
+                    : 'Type title to create page'}
               </span>
             )}
             {isEditMode && (
@@ -310,10 +321,10 @@ const PageEditor = ({
             style={{
               fontSize: '3rem',
               lineHeight: '1.2',
-              minHeight: '4rem'
+              minHeight: '4rem',
             }}
           />
-          
+
           {/* Content Textarea */}
           <div className="mt-4">
             <textarea
@@ -325,8 +336,8 @@ const PageEditor = ({
               className="w-full bg-transparent text-white text-lg placeholder-gray-500 border-none outline-none resize-none"
               style={{
                 minHeight: '400px',
-                lineHeight: '1.6'
-              }} 
+                lineHeight: '1.6',
+              }}
               rows={20}
               disabled={!isConnected}
             />
@@ -339,16 +350,15 @@ const PageEditor = ({
 
 export default PageEditor;
 
-
 // import { useState, useRef, useEffect } from 'react';
 // import { createPage, updatePage, getPageById } from '../apis/pageApi';
 
-// const PageEditor = ({ 
-//   onPageCreated, 
-//   onCancel, 
-//   workspaceId, 
+// const PageEditor = ({
+//   onPageCreated,
+//   onCancel,
+//   workspaceId,
 //   selectedPage = null,
-//   onPageUpdated 
+//   onPageUpdated
 // }) => {
 //   const [title, setTitle] = useState('');
 //   const [isSaving, setIsSaving] = useState(false);
@@ -506,9 +516,9 @@ export default PageEditor;
 //           } else {
 //             pageData = await getPageById(selectedPage.id);
 //           }
-          
+
 //           setTitle(pageData.title || '');
-          
+
 //           // Parse content for Editor.js
 //           if (pageData.content) {
 //             try {
@@ -575,14 +585,14 @@ export default PageEditor;
 
 //       if (isEditMode) {
 //         // Update existing page
-//         await updatePage(selectedPage.id, { 
-//           title: title.trim(), 
-//           content: contentString 
+//         await updatePage(selectedPage.id, {
+//           title: title.trim(),
+//           content: contentString
 //         });
-//         onPageUpdated && onPageUpdated({ 
-//           ...selectedPage, 
-//           title: title.trim(), 
-//           content: contentString 
+//         onPageUpdated && onPageUpdated({
+//           ...selectedPage,
+//           title: title.trim(),
+//           content: contentString
 //         });
 //       } else {
 //         // Create new page
@@ -684,9 +694,9 @@ export default PageEditor;
 //               fontFamily: 'ui-serif, Georgia, Cambria, "Times New Roman", Times, serif'
 //             }}
 //           />
-          
+
 //           {/* Editor.js Container */}
-//           <div 
+//           <div
 //             ref={editorRef}
 //             className="prose prose-invert prose-lg max-w-none min-h-96 focus-within:outline-none"
 //             style={{
@@ -695,7 +705,7 @@ export default PageEditor;
 //               color: '#e5e7eb'
 //             }}
 //           />
-          
+
 //           {/* Empty state hint */}
 //           {!isEditMode && (
 //             <div className="mt-8 text-gray-500 text-sm text-center">
