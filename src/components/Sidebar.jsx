@@ -37,10 +37,9 @@ const Sidebar = ({
   const [showAllPages, setShowAllPages] = useState(false);
   
   const SIDEBAR_ITEMS = [
-    { icon: Home, label: "Home", active: false },
+    
     { icon: FileText, label: "All Pages", active: false },
-    { icon: Star, label: "Favorites", active: false },
-    { icon: Trash2, label: "Trash", active: false }
+  
   ];
 
   // Determine if the current user is the owner of the active workspace.
