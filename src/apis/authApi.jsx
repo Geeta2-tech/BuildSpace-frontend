@@ -81,10 +81,23 @@ const logoutUser = async () => {
   }
 };
 
+const getCurrentUserApi = async () => {
+  try {
+    const response = await api.get({
+      endpoint: '/auth/get-current-user',
+    });
+    return response;
+  } catch (error) {
+    console.error('Error registering user:', error);
+    throw error;
+  }
+};
+
 export {
   sendVerificationCode,
   verifyCodeAndRegister,
   registerUser,
   loginUser,
   logoutUser,
+  getCurrentUserApi,
 };

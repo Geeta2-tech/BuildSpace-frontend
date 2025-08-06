@@ -15,6 +15,8 @@ const WorkspaceSelector = ({
   const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [workspaceToDelete, setWorkspaceToDelete] = useState(null);
+  const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState(null);
   const navigate = useNavigate();
   const menuRef = useRef(null);
 
@@ -46,7 +48,7 @@ const WorkspaceSelector = ({
     }
   };
 
-  // Handlers for the delete confirmation flow
+  // Handlers for the delete workspace confirmation flow
   const handleDeleteClick = (workspace) => {
     setWorkspaceToDelete(workspace);
     setIsDeleteModalOpen(true);
@@ -58,6 +60,20 @@ const WorkspaceSelector = ({
     }
     setIsDeleteModalOpen(false);
     setWorkspaceToDelete(null);
+  };
+
+  // Handlers for the remove member confirmation flow
+  const handleRemoveMemberClick = (member) => {
+    setMemberToRemove(member);
+    setIsRemoveMemberModalOpen(true);
+  };
+
+  const handleConfirmRemove = () => {
+    if (memberToRemove) {
+      handleRemoveMember(memberToRemove.userId);
+    }
+    setIsRemoveMemberModalOpen(false);
+    setMemberToRemove(null);
   };
 
   const hasWorkspaces =
@@ -222,8 +238,9 @@ const WorkspaceSelector = ({
                 </div>
                 {isOwner && member.role !== 'owner' && (
                   <button
-                    onClick={() => handleRemoveMember(member.userId)}
-                    className="text-red-500 text-xs"
+                    onClick={() => handleRemoveMemberClick(member)}
+                    className="text-red-500 text-xs p-1 rounded-md hover:bg-red-500/10 hover:text-red-400 transition-colors duration-200"
+                    aria-label={`Remove ${member.User.name}`}
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -252,13 +269,21 @@ const WorkspaceSelector = ({
           </div>
         )}
       </div>
-      {/* Render the confirmation modal */}
+      {/* Render the confirmation modal for deleting a workspace */}
       <ConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
         title="Delete Workspace"
         message={`Are you sure you want to delete the "${workspaceToDelete?.name}" workspace? This action is permanent and cannot be undone.`}
+      />
+      {/* Render the confirmation modal for removing a member */}
+      <ConfirmationModal
+        isOpen={isRemoveMemberModalOpen}
+        onClose={() => setIsRemoveMemberModalOpen(false)}
+        onConfirm={handleConfirmRemove}
+        title="Remove Member"
+        message={`Are you sure you want to remove "${memberToRemove?.User.name}" from this workspace?`}
       />
     </>
   );
