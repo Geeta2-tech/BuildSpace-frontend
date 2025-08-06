@@ -95,7 +95,7 @@ const getInvitationDetailsApi = async (token) => {
   try {
     // This is an unprotected route, so we call it directly
     const response = await api.get({
-      endpoint: `/workspace/get-invitation-details/?token=${token}`,
+      endpoint: `/workspace/get-invitation-details?token=${token}`,
     });
     return response;
   } catch (error) {
@@ -105,11 +105,13 @@ const getInvitationDetailsApi = async (token) => {
 };
 
 const acceptInvitationApi = async (token) => {
+  console.log('Accepting invitation with token (Frontend API):', token);
   try {
     const response = await api.post({
       endpoint: '/workspace/accept-invitation',
       data: { token },
     });
+    console.log('Invitation accepted:', response);
     return response;
   } catch (error) {
     console.error('Error accepting invitation:', error);
@@ -142,4 +144,3 @@ export {
   declineInvitationApi,
   getInvitationDetailsApi,
 };
-

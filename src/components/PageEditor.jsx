@@ -292,12 +292,14 @@ const PageEditor = ({
 
     if (ws && ws.readyState === WebSocket.OPEN) {
       const pageId = isEditMode ? currentPage.id : `new-${Date.now()}`;
-      ws.send(JSON.stringify({
-        type: 'title_update',
-        title: newTitle,
-        pageId: pageId,
-        blockId: currentBlockId
-      }));
+      ws.send(
+        JSON.stringify({
+          type: 'title_update',
+          title: newTitle,
+          pageId: pageId,
+          blockId: currentBlockId,
+        })
+      );
     }
   };
 
@@ -353,7 +355,7 @@ const PageEditor = ({
             style={{
               fontSize: '3rem',
               lineHeight: '1.2',
-              minHeight: '4rem'
+              minHeight: '4rem',
             }}
           />
 

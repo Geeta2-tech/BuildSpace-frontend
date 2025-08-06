@@ -10,6 +10,7 @@ import Landing from './pages/Landing';
 import Register from './pages/Register';
 import JoinWorkspacePage from './pages/JoinWorkspacePage';
 import ProtectedRoute from './components/ProtectedRoute';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="/join-workspace" element={<JoinWorkspacePage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route
               path="/home"
               element={
@@ -38,13 +40,13 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route 
-              path="/editor" 
+            <Route
+              path="/editor"
               element={
                 <ProtectedRoute>
                   <RealTimeEditor />
                 </ProtectedRoute>
-              } 
+              }
             />
           </Routes>
         </WorkspaceProvider>

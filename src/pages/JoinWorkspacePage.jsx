@@ -1,16 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useWorkspaces } from '../hooks/useWorkspaces';
-import {
-  getInvitationDetailsApi,
-  acceptInvitationApi,
-} from '../apis/workspaceApi';
-import toast from 'react-hot-toast';
+import { getInvitationDetailsApi } from '../apis/workspaceApi';
 
 const JoinWorkspacePage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { currentUser, refetchWorkspaces, logout } = useWorkspaces();
+  // Get the centralized handler from the context
+  const { currentUser, handleInvitationAction, logout } = useWorkspaces();
 
   const [status, setStatus] = useState('loading'); // loading, success, error, wrong_user, not_logged_in
   const [invitationDetails, setInvitationDetails] = useState(null);
@@ -25,30 +22,20 @@ const JoinWorkspacePage = () => {
       }
 
       try {
-        // Step 1: Fetch invitation details from the public endpoint
         const details = await getInvitationDetailsApi(token);
         setInvitationDetails(details);
 
-        console.log('Invitation details:', details);
-
-        // Step 2: Check if a user is currently logged in
         if (currentUser) {
-          // Step 3a: User is logged in, check if the email matches
           if (currentUser.email === details.email) {
-            // Correct user is logged in, automatically accept the invitation
-            await acceptInvitationApi(token);
-            toast.success(
-              `Successfully joined the ${details.Workspace.name} workspace!`
-            );
-            await refetchWorkspaces();
+            // **MODIFICATION**: Use the handler from the context
+            // This function handles the API call, data refetching, and success toast.
+            await handleInvitationAction(token, 'accept');
             setStatus('success');
             setTimeout(() => navigate('/home'), 2000);
           } else {
-            // Logged in with the wrong account
             setStatus('wrong_user');
           }
         } else {
-          // Step 3b: No user is logged in
           setStatus('not_logged_in');
         }
       } catch (error) {
@@ -66,7 +53,7 @@ const JoinWorkspacePage = () => {
     if (currentUser !== undefined) {
       processInvitation();
     }
-  }, [currentUser, searchParams, navigate, refetchWorkspaces]);
+  }, [currentUser, searchParams, navigate, handleInvitationAction]);
 
   const renderContent = () => {
     switch (status) {
@@ -77,9 +64,7 @@ const JoinWorkspacePage = () => {
           <>
             <h1 className="text-2xl font-bold text-green-600">Success!</h1>
             <p className="text-gray-600 mt-2">
-              You have successfully joined the{' '}
-              <strong>{invitationDetails?.Workspace.name}</strong> workspace.
-              Redirecting you now...
+              You have successfully joined the workspace. Redirecting you now...
             </p>
           </>
         );

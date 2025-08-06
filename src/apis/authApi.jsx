@@ -93,6 +93,30 @@ const getCurrentUserApi = async () => {
   }
 };
 
+const sendEmailVerification = async () => {
+  try {
+    const response = await api.post({
+      endpoint: '/auth/send-verification',
+    });
+    return response;
+  } catch (error) {
+    console.error('Error sending email verification:', error);
+    throw error;
+  }
+};
+
+const verifyEmail = async (token) => {
+  try {
+    const response = await api.get({
+      endpoint: `/auth/verify-email?token=${token}`,
+    });
+    return response;
+  } catch (error) {
+    console.error('Error verifying email:', error);
+    throw error;
+  }
+};
+
 export {
   sendVerificationCode,
   verifyCodeAndRegister,
@@ -100,4 +124,6 @@ export {
   loginUser,
   logoutUser,
   getCurrentUserApi,
+  sendEmailVerification,
+  verifyEmail,
 };

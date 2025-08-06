@@ -1,5 +1,3 @@
-
-import { useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import MainContent from '../components/MainContent';
@@ -11,10 +9,11 @@ import { usePages } from '../hooks/usePages';
 const Home = () => {
   const { theme = 'light', toggleTheme } = useTheme();
 
-  const { workspaces, activeWorkspace, setActiveWorkspace ,workspaceMembers} = useWorkspaces();
+  const { workspaces, activeWorkspace, setActiveWorkspace, workspaceMembers } =
+    useWorkspaces();
   // Pass the activeWorkspace.id to usePages hook
   const { recentPages, loading, error } = usePages(activeWorkspace?.id);
-  
+
   // Add state for selected page
   const [selectedPage, setSelectedPage] = useState(null);
 
@@ -29,7 +28,7 @@ const Home = () => {
   };
 
   // Handle page updated
-  const handlePageUpdated = (updatedPage) => {
+  const handlePageUpdated = () => {
     // You might want to refresh the pages list here
     // or update the specific page in the list
     setSelectedPage(null);
@@ -53,7 +52,7 @@ const Home = () => {
         // Add page selection handler
         onPageSelect={handlePageSelect}
       />
-      
+
       {/* Conditionally render PageEditor or MainContent */}
       {selectedPage ? (
         <PageEditor

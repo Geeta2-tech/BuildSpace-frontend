@@ -4,7 +4,6 @@ import NewPageEditor from './PageEditor'; // Import the new editor component
 
 const MainContent = ({ recentPages, workspaceTitle, workspaceId }) => {
   const [showNewPageEditor, setShowNewPageEditor] = useState(false);
-  console.log('activeWorkspace', workspaceId);
   const handleNewPageClick = () => {
     setShowNewPageEditor(true);
   };
@@ -30,18 +29,14 @@ const MainContent = ({ recentPages, workspaceTitle, workspaceId }) => {
     );
   }
 
-
   return (
     <div className="flex-1 p-6 bg-[#191919]">
       {/* Display the workspace title */}
       <h1 className="text-3xl font-semibold text-white">{workspaceTitle}</h1>
 
-      
       {/* Recent Pages Section */}
       <div className="mt-6">
         <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          
-
           {/* New Page Creation Card */}
           <div
             onClick={handleNewPageClick}
@@ -51,7 +46,6 @@ const MainContent = ({ recentPages, workspaceTitle, workspaceId }) => {
             <span className="text-white ml-2">New Page</span>
           </div>
         </div>
-
       </div>
     </div>
   );

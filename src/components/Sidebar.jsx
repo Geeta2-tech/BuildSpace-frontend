@@ -24,11 +24,16 @@ import { useWorkspaces } from '../hooks/useWorkspaces';
 import ConfirmationModal from './ConfirmationModal';
 import UserProfileMenu from './UserProfileMenu'; // Import new component
 import WorkspaceDropdown from './WorkspaceDropdown'; // Import new component
+import ProfileModal from './ProfileModal';
 
-const Sidebar = ({ theme, toggleTheme, pages = [],
+const Sidebar = ({
+  theme,
+  toggleTheme,
+  pages = [],
   pagesLoading = false,
   pagesError = null,
-  onPageSelect, // Add this prop to handle page selection }) => {
+  onPageSelect, // Add this prop to handle page selection
+}) => {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -39,11 +44,14 @@ const Sidebar = ({ theme, toggleTheme, pages = [],
   const [showPrivatePages, setShowPrivatePages] = useState(true);
   // Add state to manage the visibility of workspace pages when "All Pages" is clicked
   const [showAllPages, setShowAllPages] = useState(false);
-  
+
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
   const SIDEBAR_ITEMS = [
-    
-    { icon: FileText, label: "All Pages", active: false },
-  
+    { icon: Home, label: 'Home', active: false },
+    { icon: FileText, label: 'All Pages', active: false },
+    { icon: Star, label: 'Favorites', active: false },
+    { icon: Trash2, label: 'Trash', active: false },
   ];
 
   const menuRef = useRef(null);
@@ -97,7 +105,7 @@ const Sidebar = ({ theme, toggleTheme, pages = [],
 
   const handleConfirmRemove = () => {
     if (memberToRemove) {
-      removeWorkspaceMember(memberToRemove.userId);
+      removeWorkspaceMember(activeWorkspace.id, memberToRemove.userId);
     }
     setIsRemoveMemberModalOpen(false);
     setMemberToRemove(null);
@@ -109,7 +117,8 @@ const Sidebar = ({ theme, toggleTheme, pages = [],
         <div className="p-3 border-b border-gray-800 relative" ref={menuRef}>
           <UserProfileMenu
             currentUser={currentUser}
-            onClick={() => setShowUserMenu(!showUserMenu)}
+            onProfileClick={() => setIsProfileModalOpen(true)}
+            onDropdownClick={() => setShowUserMenu(!showUserMenu)}
           />
           {showUserMenu && (
             <WorkspaceDropdown
@@ -143,66 +152,68 @@ const Sidebar = ({ theme, toggleTheme, pages = [],
         <div className="flex-1 px-3 py-2 overflow-y-auto">
           {/* Navigation */}
           <div className="space-y-1">
-          {SIDEBAR_ITEMS.map((item, index) => (
-            <div
-              key={index}
-              className={`flex items-center space-x-3 px-3 py-2 rounded-md cursor-pointer ${
-                (item.label === "All Pages" && showAllPages) || item.active
-                  ? 'bg-gray-800 text-white'
-                  : 'text-gray-300 hover:bg-gray-700'
-              }`}
-              onClick={() => {
-                // Toggle workspace pages when "All Pages" is clicked
-                if (item.label === 'All Pages') {
-                  setShowAllPages(!showAllPages);
-                }
-              }}
-            >
-              <item.icon className="w-4 h-4" />
-              <span className="text-sm">{item.label}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Workspace Pages Section - Only show when showAllPages is true */}
-        {activeWorkspace && showAllPages && (
-          <div className="mt-6">
-            <div className="text-xs text-gray-400 uppercase tracking-wide mb-2 px-3">
-              {activeWorkspace.name} Pages
-            </div>
-            {pagesLoading ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
-                <span className="text-xs text-gray-400 ml-2">Loading pages...</span>
+            {SIDEBAR_ITEMS.map((item, index) => (
+              <div
+                key={index}
+                className={`flex items-center space-x-3 px-3 py-2 rounded-md cursor-pointer ${
+                  (item.label === 'All Pages' && showAllPages) || item.active
+                    ? 'bg-gray-800 text-white'
+                    : 'text-gray-300 hover:bg-gray-700'
+                }`}
+                onClick={() => {
+                  // Toggle workspace pages when "All Pages" is clicked
+                  if (item.label === 'All Pages') {
+                    setShowAllPages(!showAllPages);
+                  }
+                }}
+              >
+                <item.icon className="w-4 h-4" />
+                <span className="text-sm">{item.label}</span>
               </div>
-            ) : pagesError ? (
-              <div className="px-3 py-2 text-xs text-red-400">
-                Error loading pages
-              </div>
-            ) : pages.length > 0 ? (
-              <div className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-                <div className="space-y-1">
-                  {pages.map((page) => (
-                    <div
-                      key={page.id}
-                      className="flex items-center space-x-3 px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 cursor-pointer"
-                      onClick={() => onPageSelect && onPageSelect(page)} // Add click handler
-                    >
-                      <FileText className="w-4 h-4" />
-                      <span className="text-sm truncate" title={page.title}>
-                        {page.title || 'Untitled'}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="px-3 py-2 text-xs text-gray-500">
-                No pages yet
-              </div>
-            )}
+            ))}
           </div>
-        )}
+
+          {/* Workspace Pages Section - Only show when showAllPages is true */}
+          {activeWorkspace && showAllPages && (
+            <div className="mt-6">
+              <div className="text-xs text-gray-400 uppercase tracking-wide mb-2 px-3">
+                {activeWorkspace.name} Pages
+              </div>
+              {pagesLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
+                  <span className="text-xs text-gray-400 ml-2">
+                    Loading pages...
+                  </span>
+                </div>
+              ) : pagesError ? (
+                <div className="px-3 py-2 text-xs text-red-400">
+                  Error loading pages
+                </div>
+              ) : pages.length > 0 ? (
+                <div className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                  <div className="space-y-1">
+                    {pages.map((page) => (
+                      <div
+                        key={page.id}
+                        className="flex items-center space-x-3 px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 cursor-pointer"
+                        onClick={() => onPageSelect && onPageSelect(page)} // Add click handler
+                      >
+                        <FileText className="w-4 h-4" />
+                        <span className="text-sm truncate" title={page.title}>
+                          {page.title || 'Untitled'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="px-3 py-2 text-xs text-gray-500">
+                  No pages yet
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Invitations Section */}
           {pendingInvitations && pendingInvitations.length > 0 && (
@@ -220,7 +231,8 @@ const Sidebar = ({ theme, toggleTheme, pages = [],
                     <p className="mb-2">
                       Join{' '}
                       <span className="font-semibold text-white">
-                        {invite.Workspace?.name || 'a workspace'}
+                        {invite.workspace?.name || 'a workspace'} (
+                        {invite.role[0].toUpperCase() + invite.role.slice(1)})
                       </span>
                     </p>
                     <div className="flex items-center justify-end gap-2">
@@ -278,7 +290,7 @@ const Sidebar = ({ theme, toggleTheme, pages = [],
             </Button>
           </div>
         </div>
-        
+
         {isOwner && showInviteModal && (
           <InviteMembersModal
             activeWorkspace={activeWorkspace}
@@ -300,6 +312,10 @@ const Sidebar = ({ theme, toggleTheme, pages = [],
         onConfirm={handleConfirmRemove}
         title="Remove Member"
         message={`Are you sure you want to remove "${memberToRemove?.User.name}" from this workspace?`}
+      />
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
       />
     </>
   );
