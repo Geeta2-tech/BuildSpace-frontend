@@ -38,6 +38,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route 
+              path="/editor" 
+              element={
+                <ProtectedRoute>
+                  <RealTimeEditor />
+                </ProtectedRoute>
+              } 
+            />
           </Routes>
         </WorkspaceProvider>
       </Router>

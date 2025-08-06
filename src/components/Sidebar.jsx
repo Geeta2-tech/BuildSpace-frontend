@@ -12,6 +12,9 @@ import {
   Mail,
   Check,
   X,
+  ChevronDown,
+  ChevronRight,
+  Loader2,
 } from 'lucide-react';
 import Button from './Button';
 import { SIDEBAR_ITEMS } from '../utils/constants';
@@ -22,13 +25,27 @@ import ConfirmationModal from './ConfirmationModal';
 import UserProfileMenu from './UserProfileMenu'; // Import new component
 import WorkspaceDropdown from './WorkspaceDropdown'; // Import new component
 
-const Sidebar = ({ theme, toggleTheme }) => {
+const Sidebar = ({ theme, toggleTheme, pages = [],
+  pagesLoading = false,
+  pagesError = null,
+  onPageSelect, // Add this prop to handle page selection }) => {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [workspaceToDelete, setWorkspaceToDelete] = useState(null);
   const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState(null);
+  // Add state to manage the visibility of private pages
+  const [showPrivatePages, setShowPrivatePages] = useState(true);
+  // Add state to manage the visibility of workspace pages when "All Pages" is clicked
+  const [showAllPages, setShowAllPages] = useState(false);
+  
+  const SIDEBAR_ITEMS = [
+    { icon: Home, label: "Home", active: false },
+    { icon: FileText, label: "All Pages", active: false },
+    { icon: Star, label: "Favorites", active: false },
+    { icon: Trash2, label: "Trash", active: false }
+  ];
 
   const menuRef = useRef(null);
 
@@ -127,20 +144,66 @@ const Sidebar = ({ theme, toggleTheme }) => {
         <div className="flex-1 px-3 py-2 overflow-y-auto">
           {/* Navigation */}
           <div className="space-y-1">
-            {SIDEBAR_ITEMS.map((item, index) => (
-              <div
-                key={index}
-                className={`flex items-center space-x-3 px-3 py-2 rounded-md cursor-pointer ${
-                  item.active
-                    ? 'bg-gray-800 text-white'
-                    : 'text-gray-300 hover:bg-gray-700'
-                }`}
-              >
-                <item.icon className="w-4 h-4" />
-                <span className="text-sm">{item.label}</span>
+          {SIDEBAR_ITEMS.map((item, index) => (
+            <div
+              key={index}
+              className={`flex items-center space-x-3 px-3 py-2 rounded-md cursor-pointer ${
+                (item.label === "All Pages" && showAllPages) || item.active
+                  ? 'bg-gray-800 text-white'
+                  : 'text-gray-300 hover:bg-gray-700'
+              }`}
+              onClick={() => {
+                // Toggle workspace pages when "All Pages" is clicked
+                if (item.label === 'All Pages') {
+                  setShowAllPages(!showAllPages);
+                }
+              }}
+            >
+              <item.icon className="w-4 h-4" />
+              <span className="text-sm">{item.label}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Workspace Pages Section - Only show when showAllPages is true */}
+        {activeWorkspace && showAllPages && (
+          <div className="mt-6">
+            <div className="text-xs text-gray-400 uppercase tracking-wide mb-2 px-3">
+              {activeWorkspace.name} Pages
+            </div>
+            {pagesLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
+                <span className="text-xs text-gray-400 ml-2">Loading pages...</span>
               </div>
-            ))}
+            ) : pagesError ? (
+              <div className="px-3 py-2 text-xs text-red-400">
+                Error loading pages
+              </div>
+            ) : pages.length > 0 ? (
+              <div className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                <div className="space-y-1">
+                  {pages.map((page) => (
+                    <div
+                      key={page.id}
+                      className="flex items-center space-x-3 px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 cursor-pointer"
+                      onClick={() => onPageSelect && onPageSelect(page)} // Add click handler
+                    >
+                      <FileText className="w-4 h-4" />
+                      <span className="text-sm truncate" title={page.title}>
+                        {page.title || 'Untitled'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="px-3 py-2 text-xs text-gray-500">
+                No pages yet
+              </div>
+            )}
           </div>
+        )}
 
           {/* Invitations Section */}
           {pendingInvitations && pendingInvitations.length > 0 && (
@@ -216,7 +279,7 @@ const Sidebar = ({ theme, toggleTheme }) => {
             </Button>
           </div>
         </div>
-
+        
         {isOwner && showInviteModal && (
           <InviteMembersModal
             activeWorkspace={activeWorkspace}

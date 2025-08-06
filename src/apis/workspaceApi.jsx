@@ -40,8 +40,6 @@ const deleteWorkspaceApi = async (workspaceId) => {
   }
 };
 
-// --- Member Management ---
-
 const getAllWorkspaceMembers = async (workspaceId) => {
   try {
     const response = await api.get({
@@ -144,3 +142,4 @@ export {
   declineInvitationApi,
   getInvitationDetailsApi,
 };
+
