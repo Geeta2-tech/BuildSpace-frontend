@@ -28,6 +28,7 @@ const getAllWorkspaces = async () => {
   }
 };
 
+
 const deleteWorkspaceApi = async (workspaceId) => {
   try {
     const response = await api.delete({
@@ -39,6 +40,7 @@ const deleteWorkspaceApi = async (workspaceId) => {
     throw error;
   }
 };
+
 
 const getAllWorkspaceMembers = async (workspaceId) => {
   try {
