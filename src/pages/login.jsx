@@ -62,10 +62,6 @@ const Login = () => {
     }
   }, [currentUser, loading, navigate]);
 
-  const handleSocialLogin = (provider) => {
-    console.log(`Login with ${provider}`);
-  };
-
   const startResendTimer = () => {
     setResendCountdown(30);
     const interval = setInterval(() => {
@@ -114,26 +110,11 @@ const Login = () => {
         </p>
       </div>
       <div className="space-y-3">
-        <GoogleLogin
-          onSuccess={() => {
-            navigate('/home');
-          }}
-          onError={() => console.error('Login Failed')}
-        />
+
         <SocialButton
           icon="🚀"
           text="Continue with Email/Password"
           onClick={() => setLoginView('basic')}
-        />
-        <SocialButton
-          icon="👤"
-          text="Log in with passkey"
-          onClick={() => handleSocialLogin('Passkey')}
-        />
-        <SocialButton
-          icon="🔒"
-          text="Single sign-on (SSO)"
-          onClick={() => handleSocialLogin('SSO')}
         />
       </div>
       <div className="relative flex py-5 items-center">

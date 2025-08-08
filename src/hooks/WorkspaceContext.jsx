@@ -1,4 +1,14 @@
-import { createContext, useState, useEffect, useCallback } from 'react';
+
+// Updated WorkspaceContext with role checking utilities
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import {
   getAllWorkspaceMembersApi,
@@ -30,6 +40,48 @@ export const WorkspaceProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [activeWorkspace, setActiveWorkspace] = useState(null);
   const navigate = useNavigate();
+
+  // Role checking utilities
+  const currentUserRole = useMemo(() => {
+    if (!currentUser || !activeWorkspace || !workspaceMembers) return null;
+    
+    // Check if user is the workspace owner
+    if (activeWorkspace.ownerId === currentUser.id) {
+      return 'owner';
+    }
+    
+    // Check if user is a member and get their role
+    const memberInfo = workspaceMembers.find(member => member.userId === currentUser.id);
+    return memberInfo?.role || null;
+  }, [currentUser, activeWorkspace, workspaceMembers]);
+
+  const userPermissions = useMemo(() => {
+    const role = currentUserRole;
+    
+    return {
+      canEdit: role === 'owner' || role === 'editor',
+      canView: role === 'owner' || role === 'editor' || role === 'viewer',
+      canDelete: role === 'owner' || role === 'editor',
+      canCreatePages: role === 'owner' || role === 'editor',
+      canManageMembers: role === 'owner',
+      canDeleteWorkspace: role === 'owner',
+      isOwner: role === 'owner',
+      isEditor: role === 'editor',
+      isViewer: role === 'viewer'
+    };
+  }, [currentUserRole]);
+
+  const checkPermission = useCallback((action) => {
+    return userPermissions[action] || false;
+  }, [userPermissions]);
+
+  const requirePermission = useCallback((action, errorMessage) => {
+    if (!checkPermission(action)) {
+      toast.error(errorMessage || `You don't have permission to ${action}`);
+      return false;
+    }
+    return true;
+  }, [checkPermission]);
 
   const logout = useCallback(async () => {
     try {
@@ -125,6 +177,7 @@ export const WorkspaceProvider = ({ children }) => {
     }
   }, [activeWorkspace, refetchWorkspaceMembers]);
 
+
   const handleInvitationAction = async (token, action) => {
     try {
       if (action === 'accept') {
@@ -141,7 +194,12 @@ export const WorkspaceProvider = ({ children }) => {
     }
   };
 
+
   const deleteWorkspace = async (workspaceId) => {
+    if (!requirePermission('canDeleteWorkspace', 'Only workspace owners can delete workspaces')) {
+      return;
+    }
+
     try {
       await deleteWorkspaceApi(workspaceId);
       toast.success('Workspace deleted successfully!');
@@ -174,6 +232,10 @@ export const WorkspaceProvider = ({ children }) => {
   };
 
   const removeWorkspaceMember = async (workspaceId, memberIdToRemove) => {
+    if (!requirePermission('canManageMembers', 'Only workspace owners can manage members')) {
+      return;
+    }
+
     try {
       await removeAMemberApi(workspaceId, memberIdToRemove);
       if (memberIdToRemove === currentUser?.id) {
@@ -205,6 +267,11 @@ export const WorkspaceProvider = ({ children }) => {
     refetchWorkspaceMembers,
     deleteWorkspace,
     handleInvitationAction,
+    // Role-based access control
+    currentUserRole,
+    userPermissions,
+    checkPermission,
+    requirePermission,
   };
 
   return (
@@ -213,3 +280,13 @@ export const WorkspaceProvider = ({ children }) => {
     </WorkspaceContext.Provider>
   );
 };
+
+
+export const useWorkspaces = () => {
+  const context = useContext(WorkspaceContext);
+  if (context === undefined) {
+    throw new Error('useWorkspaces must be used within a WorkspaceProvider');
+  }
+  return context;
+};
+

@@ -107,9 +107,11 @@ const InviteMembersModal = ({ activeWorkspace, onClose }) => {
               <option value="viewer">Viewer</option>
               <option value="editor">Editor</option>
             </select>
+
             <Button onClick={addMemberToList} disabled={isSending}>
               Add
             </Button>
+
           </div>
           <div className="space-y-2 max-h-32 overflow-y-auto pr-2">
             {members.map((m, i) => (
@@ -152,8 +154,10 @@ const InviteMembersModal = ({ activeWorkspace, onClose }) => {
 
         <Button
           onClick={sendInvitations}
+
           className="w-full mt-4 flex items-center justify-center"
           disabled={members.length === 0 || isSending}
+
         >
           {isSending ? (
             <>
