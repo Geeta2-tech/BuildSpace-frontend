@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom'; // Import Link
 import { Eye, EyeOff } from 'lucide-react';
-import { registerUser } from '../apis/authApi';
+import { registerUserApi } from '../apis/authApi';
 import toast from 'react-hot-toast';
 
 const Logo = () => (
@@ -81,8 +81,7 @@ const Register = () => {
     }
 
     try {
-      const response = await registerUser({ email, name, password });
-      console.log('User registered:', response);
+      await registerUserApi({ email, name, password });
       toast.success('Registration successful! Please log in.');
       navigate('/login');
     } catch (error) {

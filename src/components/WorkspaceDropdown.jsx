@@ -111,6 +111,9 @@ const WorkspaceDropdown = ({
                     {member.User.name?.charAt(0) || 'M'}
                   </Avatar>
                   <div className="text-sm text-white">{member.User.name}</div>
+                  <div className="text-sm text-gray-400 text-center">
+                    {member.role[0].toUpperCase() + member.role.slice(1)}
+                  </div>
                 </div>
                 {canRemove && (
                   <button

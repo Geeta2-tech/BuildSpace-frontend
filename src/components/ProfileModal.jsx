@@ -3,7 +3,7 @@ import { X, Loader2, Edit2, Check, Camera, ShieldCheck } from 'lucide-react';
 import Avatar from './Avatar';
 import { useWorkspaces } from '../hooks/useWorkspaces';
 import { getProfile, updateUsername, createAvatar } from '../apis/profileApi';
-import { sendEmailVerification, deleteUser } from '../apis/authApi'; // Assuming deleteUser exists
+import { sendEmailVerificationApi, deleteUserApi } from '../apis/authApi'; // Assuming deleteUserApi exists
 import toast from 'react-hot-toast';
 import ConfirmationModal from './ConfirmationModal'; // Import the modal
 
@@ -81,7 +81,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
 
   const handleVerifyEmail = async () => {
     try {
-      await sendEmailVerification();
+      await sendEmailVerificationApi();
       toast.success('Verification email sent! Please check your inbox.');
     } catch (err) {
       toast.error('Failed to send verification email. Please try again later.');
@@ -96,7 +96,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
 
   const handleConfirmdeleteUser = async () => {
     try {
-      await deleteUser(); // Assuming this API call exists and uses the auth token
+      await deleteUserApi(); // Assuming this API call exists and uses the auth token
       toast.success('Your account has been permanently deleted.');
       setIsdeleteUserModalOpen(false);
       logout(); // Log the user out after deleting their account

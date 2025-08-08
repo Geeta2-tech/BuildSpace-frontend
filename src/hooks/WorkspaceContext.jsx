@@ -1,25 +1,16 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-} from 'react';
+import { createContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  getAllWorkspaceMembers,
-  getAllWorkspaces,
+  getAllWorkspaceMembersApi,
+  getAllWorkspacesApi,
   deleteWorkspaceApi,
   getPendingInvitationsApi,
   acceptInvitationApi,
   declineInvitationApi,
-  removeAMember,
+  removeAMemberApi,
   createWorkspaceApi,
 } from '../apis/workspaceApi';
-import {
-  logoutUser as apiLogoutUser,
-  getCurrentUserApi,
-} from '../apis/authApi';
+import { logoutUserApi, getCurrentUserApi } from '../apis/authApi';
 import toast from 'react-hot-toast';
 
 const clearCookie = (name) => {
@@ -42,7 +33,7 @@ export const WorkspaceProvider = ({ children }) => {
 
   const logout = useCallback(async () => {
     try {
-      await apiLogoutUser();
+      await logoutUserApi();
     } catch (error) {
       console.error(
         'API logout failed, proceeding with client-side cleanup.',
@@ -63,7 +54,7 @@ export const WorkspaceProvider = ({ children }) => {
 
   const fetchWorkspaces = useCallback(async () => {
     try {
-      const response = await getAllWorkspaces();
+      const response = await getAllWorkspacesApi();
       setWorkspaces(response);
       const lastActiveId = localStorage.getItem('lastActiveWorkspaceId');
       if (lastActiveId) {
@@ -75,6 +66,7 @@ export const WorkspaceProvider = ({ children }) => {
       } else {
         setActiveWorkspace(response.owned[0] || null);
       }
+      return response; // Return the fetched data
     } catch (err) {
       console.error('Error fetching workspaces:', err);
     }
@@ -117,7 +109,7 @@ export const WorkspaceProvider = ({ children }) => {
   const refetchWorkspaceMembers = useCallback(async () => {
     if (!activeWorkspace) return;
     try {
-      const response = await getAllWorkspaceMembers(activeWorkspace.id);
+      const response = await getAllWorkspaceMembersApi(activeWorkspace.id);
       setWorkspaceMembers(response.members);
     } catch (err) {
       console.error('Error refetching workspace members:', err);
@@ -133,41 +125,27 @@ export const WorkspaceProvider = ({ children }) => {
     }
   }, [activeWorkspace, refetchWorkspaceMembers]);
 
-  // **THE FIX**: Wrap this function in useCallback
-  const handleInvitationAction = useCallback(
-    async (token, action) => {
-      try {
-        if (action === 'accept') {
-          await acceptInvitationApi(token);
-          toast.success('Invitation accepted!');
-        } else {
-          await declineInvitationApi(token);
-          toast.success('Invitation declined.');
-        }
-        // After action, refetch everything to update the UI
-        await Promise.all([fetchWorkspaces(), fetchPendingInvitations()]);
-      } catch (error) {
-        toast.error(`Failed to ${action} invitation.`);
-        console.error(`Error handling invitation:`, error);
+  const handleInvitationAction = async (token, action) => {
+    try {
+      if (action === 'accept') {
+        await acceptInvitationApi(token);
+        toast.success('Invitation accepted!');
+      } else {
+        await declineInvitationApi(token);
+        toast.success('Invitation declined.');
       }
-    },
-    [fetchWorkspaces, fetchPendingInvitations]
-  ); // Add dependencies
+      await Promise.all([fetchWorkspaces(), fetchPendingInvitations()]);
+    } catch (error) {
+      toast.error(`Failed to ${action} invitation.`);
+      console.error(`Error handling invitation:`, error);
+    }
+  };
 
   const deleteWorkspace = async (workspaceId) => {
     try {
       await deleteWorkspaceApi(workspaceId);
-      const newWorkspaces = {
-        ...workspaces,
-        owned: workspaces.owned.filter((ws) => ws.id !== workspaceId),
-      };
-      setWorkspaces(newWorkspaces);
-      if (activeWorkspace?.id === workspaceId) {
-        const nextActive =
-          newWorkspaces.owned[0] || newWorkspaces.shared[0] || null;
-        setActiveWorkspace(nextActive);
-      }
       toast.success('Workspace deleted successfully!');
+      await fetchWorkspaces(); // Refetch after deleting
     } catch (error) {
       toast.error('Failed to delete workspace.');
       console.error('Error deleting workspace:', error);
@@ -177,15 +155,19 @@ export const WorkspaceProvider = ({ children }) => {
   const addWorkspace = async (name) => {
     try {
       const newWorkspace = await createWorkspaceApi(name);
-      setWorkspaces((prev) => ({
-        ...prev,
-        owned: [newWorkspace, ...prev.owned],
-      }));
-      setActiveWorkspace(newWorkspace);
-      toast.success('Workspace created successfully!');
+
+      const updatedWorkspaces = await fetchWorkspaces();
+
+      if (updatedWorkspaces) {
+        const newlyCreated = updatedWorkspaces.owned.find(
+          (ws) => ws.id === newWorkspace.id
+        );
+        if (newlyCreated) {
+          setActiveWorkspace(newlyCreated);
+        }
+      }
       return newWorkspace;
     } catch (error) {
-      // toast.error('Failed to create workspace.');
       console.error('Error creating workspace:', error);
       throw error;
     }
@@ -193,15 +175,13 @@ export const WorkspaceProvider = ({ children }) => {
 
   const removeWorkspaceMember = async (workspaceId, memberIdToRemove) => {
     try {
-      await removeAMember(workspaceId, memberIdToRemove);
+      await removeAMemberApi(workspaceId, memberIdToRemove);
       if (memberIdToRemove === currentUser?.id) {
         toast.success('You have left the workspace.');
         await fetchWorkspaces();
       } else {
-        setWorkspaceMembers((currentMembers) =>
-          currentMembers.filter((member) => member.userId !== memberIdToRemove)
-        );
         toast.success('Member removed successfully!');
+        await refetchWorkspaceMembers();
       }
     } catch (error) {
       toast.error('Failed to remove member.');
@@ -232,12 +212,4 @@ export const WorkspaceProvider = ({ children }) => {
       {children}
     </WorkspaceContext.Provider>
   );
-};
-
-export const useWorkspaces = () => {
-  const context = useContext(WorkspaceContext);
-  if (context === undefined) {
-    throw new Error('useWorkspaces must be used within a WorkspaceProvider');
-  }
-  return context;
 };

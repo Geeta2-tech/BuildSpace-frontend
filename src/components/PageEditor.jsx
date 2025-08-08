@@ -78,6 +78,7 @@ const PageEditor = ({
           throw new Error('Not Editor.js format');
         }
       } catch (e) {
+        console.error('Content is not in Editor.js format, converting:', e);
         const lines = content.split('\n').filter((line) => line.trim() !== '');
         if (lines.length > 0) {
           editorData = {

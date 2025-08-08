@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { resetPassword } from '../apis/authApi';
+import { resetPasswordApi } from '../apis/authApi';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff, CheckCircle } from 'lucide-react';
 
@@ -31,7 +31,7 @@ const ResetPasswordPage = () => {
     }
     setLoading(true);
     try {
-      await resetPassword(token, password);
+      await resetPasswordApi(token, password);
       setSuccess(true);
     } catch (error) {
       toast.error(

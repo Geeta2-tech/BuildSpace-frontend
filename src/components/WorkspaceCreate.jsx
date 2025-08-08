@@ -2,7 +2,6 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useWorkspaces } from '../hooks/useWorkspaces';
-import { createWorkspaceApi } from '../apis/workspaceApi';
 import { X } from 'lucide-react';
 
 const WorkspaceCreate = () => {
@@ -20,19 +19,8 @@ const WorkspaceCreate = () => {
       return;
     }
 
-    const data = { name: title };
-
     try {
-      const response = await createWorkspaceApi(data.name);
-      console.log('Workspace created:', response);
-
-      const newWorkspace = {
-        id: Date.now(),
-        name: title,
-        members: [],
-      };
-
-      addWorkspace(newWorkspace);
+      addWorkspace(title);
       toast.success('Workspace created successfully');
       navigate('/home');
     } catch (error) {

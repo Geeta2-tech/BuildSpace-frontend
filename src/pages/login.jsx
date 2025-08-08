@@ -115,11 +115,10 @@ const Login = () => {
       </div>
       <div className="space-y-3">
         <GoogleLogin
-          onSuccess={(credentialResponse) => {
-            console.log(credentialResponse);
+          onSuccess={() => {
             navigate('/home');
           }}
-          onError={() => console.log('Login Failed')}
+          onError={() => console.error('Login Failed')}
         />
         <SocialButton
           icon="🚀"
