@@ -49,10 +49,6 @@ const Login = () => {
   const [resendCountdown, setResendCountdown] = useState(0);
   const navigate = useNavigate();
 
-  const handleSocialLogin = (provider) => {
-    console.log(`Login with ${provider}`);
-  };
-
   const startResendTimer = () => {
     setResendCountdown(30);
     const interval = setInterval(() => {
@@ -101,27 +97,10 @@ const Login = () => {
         </p>
       </div>
       <div className="space-y-3">
-        <GoogleLogin
-          onSuccess={(credentialResponse) => {
-            console.log(credentialResponse);
-            navigate('/home');
-          }}
-          onError={() => console.log('Login Failed')}
-        />
         <SocialButton
           icon="🚀"
           text="Continue with Email/Password"
           onClick={() => setLoginView('basic')}
-        />
-        <SocialButton
-          icon="👤"
-          text="Log in with passkey"
-          onClick={() => handleSocialLogin('Passkey')}
-        />
-        <SocialButton
-          icon="🔒"
-          text="Single sign-on (SSO)"
-          onClick={() => handleSocialLogin('SSO')}
         />
       </div>
       <div className="relative flex py-5 items-center">

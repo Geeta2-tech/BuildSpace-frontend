@@ -1,7 +1,9 @@
-import React from 'react';
+import {useState} from 'react';
 import { Plus, Trash2 as TrashIcon, X } from 'lucide-react';
 import Avatar from './Avatar';
 import { useNavigate } from 'react-router-dom';
+import UserProfileMenu from './UserProfileMenu';
+import ProfileModal from './ProfileModal';
 
 const WorkspaceDropdown = ({
   workspaces,
@@ -16,9 +18,22 @@ const WorkspaceDropdown = ({
   onClose,
 }) => {
   const navigate = useNavigate();
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  
 
   return (
     <div className="mt-2 py-2 bg-gray-800 rounded-md w-72 absolute left-0 z-10 max-h-[70vh] overflow-y-auto">
+      <UserProfileMenu
+            currentUser={currentUser}
+            onProfileClick={() => setIsProfileModalOpen(true)}
+            // onDropdownClick={() => setShowUserMenu(showUserMenu)}
+
+          />
+
+        <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
       {/* Owned Workspaces Section */}
       {workspaces.owned.length > 0 && (
         <>

@@ -107,7 +107,7 @@ const InviteMembersModal = ({ activeWorkspace, onClose }) => {
               <option value="viewer">Viewer</option>
               <option value="editor">Editor</option>
             </select>
-            <Button onClick={addMemberToList}>Add</Button>
+            <Button className="bg-blue-500 hover:bg-blue-400" onClick={addMemberToList}>Add</Button>
           </div>
           <div className="space-y-2 max-h-32 overflow-y-auto pr-2">
             {members.map((m, i) => (
@@ -148,7 +148,7 @@ const InviteMembersModal = ({ activeWorkspace, onClose }) => {
 
         <Button
           onClick={sendInvitations}
-          className="w-full mt-4"
+          className="w-full mt-4 bg-blue-500 hover:bg-blue-400"
           disabled={members.length === 0}
         >
           Send Invitations
