@@ -33,14 +33,12 @@ const Sidebar = ({
   const [memberToRemove, setMemberToRemove] = useState(null);
   const [showAllPages, setShowAllPages] = useState(false);
 
+
+  const SIDEBAR_ITEMS = [{ icon: FileText, label: 'All Pages', active: false }];
+
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
-  const SIDEBAR_ITEMS = [
-    { icon: Home, label: 'Home', active: false },
-    { icon: FileText, label: 'All Pages', active: false },
-    { icon: Star, label: 'Favorites', active: false },
-    { icon: Trash2, label: 'Trash', active: false },
-  ];
+ 
 
   const menuRef = useRef(null);
 
@@ -124,6 +122,44 @@ const Sidebar = ({
           )}
         </div>
 
+
+      {/* Navigation */}
+      <div className="flex-1 px-3">
+        <div className="space-y-1">
+          {SIDEBAR_ITEMS.map((item, index) => (
+            <div
+              key={index}
+              className={`flex items-center space-x-3 px-3 py-2 rounded-md cursor-pointer ${
+                (item.label === 'All Pages' && showAllPages) || item.active
+                  ? 'bg-gray-800 text-white'
+                  : 'text-gray-300 hover:bg-gray-700'
+              }`}
+              onClick={() => {
+                // Toggle workspace pages when "All Pages" is clicked
+                if (item.label === 'All Pages') {
+                  setShowAllPages(!showAllPages);
+                }
+              }}
+            >
+              <item.icon className="w-4 h-4" />
+              <span className="text-sm">{item.label}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Workspace Pages Section - Only show when showAllPages is true */}
+        {activeWorkspace && showAllPages && (
+          <div className="mt-6">
+            <div className="text-xs text-gray-400 uppercase tracking-wide mb-2 px-3">
+              {activeWorkspace.name} Pages
+            </div>
+            {pagesLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
+                <span className="text-xs text-gray-400 ml-2">
+                  Loading pages...
+                </span>
+
         {/* Search */}
         <div className="p-3">
           <div className="relative">
@@ -157,6 +193,7 @@ const Sidebar = ({
               >
                 <item.icon className="w-4 h-4" />
                 <span className="text-sm">{item.label}</span>
+
               </div>
             ))}
           </div>
@@ -246,6 +283,9 @@ const Sidebar = ({
                   </div>
                 ))}
               </div>
+
+            
+
             </div>
           )}
         </div>
@@ -263,6 +303,7 @@ const Sidebar = ({
             </Button>
           )}
         </div>
+
 
         {isOwner && showInviteModal && (
           <InviteMembersModal

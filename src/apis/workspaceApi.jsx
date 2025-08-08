@@ -25,6 +25,7 @@ const getAllWorkspacesApi = async () => {
   }
 };
 
+
 const deleteWorkspaceApi = async (workspaceId) => {
   try {
     const response = await api.delete({
