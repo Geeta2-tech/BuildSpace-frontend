@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
-import { loginUser } from '../apis/authApi';
+import { loginUserApi } from '../apis/authApi';
 import { useWorkspaces } from '../hooks/useWorkspaces';
 import toast from 'react-hot-toast';
 
@@ -38,19 +38,15 @@ const BasicLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
-  // **MODIFIED**: Get the new initializeSession function
   const { initializeSession } = useWorkspaces();
   const navigate = useNavigate();
 
   const handleLogin = async () => {
     if (email && password) {
       try {
-        await loginUser({ email, password });
+        await loginUserApi({ email, password });
         toast.success('Login successful!');
-
-        // **MODIFIED**: Call the session initializer
         await initializeSession();
-
         navigate('/home');
       } catch (error) {
         toast.error('Login failed. Please check your credentials.');
@@ -67,15 +63,26 @@ const BasicLogin = () => {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
-      <InputField
-        label="Password"
-        type="text"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        showToggle
-        toggleVisibility={() => setPasswordVisible(!passwordVisible)}
-        isVisible={passwordVisible}
-      />
+      <div>
+        <InputField
+          label="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          showToggle
+          toggleVisibility={() => setPasswordVisible(!passwordVisible)}
+          isVisible={passwordVisible}
+        />
+        {/* **NEW**: Forgot Password Link */}
+        <div className="text-right mt-2">
+          <Link
+            to="/forgot-password" // This should point to your password reset page
+            className="text-sm font-medium text-blue-600 hover:underline"
+          >
+            Forgot Password?
+          </Link>
+        </div>
+      </div>
       <button
         onClick={handleLogin}
         disabled={!(email && password)}

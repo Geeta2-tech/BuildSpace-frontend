@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
 import { sendVerificationCode, verifyCodeAndRegister } from '../apis/authApi';
 import BasicLogin from '../components/BasicLogin';
 import { ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useWorkspaces } from '../hooks/useWorkspaces'; // Import the context hook
+
+// The getCookie helper is no longer needed and has been removed.
 
 // Logo Component
 const Logo = () => (
@@ -48,6 +51,16 @@ const Login = () => {
   const [verificationCode, setVerificationCode] = useState('');
   const [resendCountdown, setResendCountdown] = useState(0);
   const navigate = useNavigate();
+  const { currentUser, loading } = useWorkspaces(); // Get user state from context
+
+  // **MODIFIED**: Check for an existing session using the context
+  useEffect(() => {
+    // Wait until the initial loading is done
+    if (!loading && currentUser) {
+      // If loading is finished and a user exists, they are already logged in.
+      navigate('/home', { replace: true });
+    }
+  }, [currentUser, loading, navigate]);
 
   const startResendTimer = () => {
     setResendCountdown(30);
@@ -97,6 +110,7 @@ const Login = () => {
         </p>
       </div>
       <div className="space-y-3">
+
         <SocialButton
           icon="🚀"
           text="Continue with Email/Password"
@@ -211,6 +225,11 @@ const Login = () => {
         return renderDefaultView();
     }
   };
+
+  // While loading, we can render a blank screen or a spinner to prevent a "flash" of the login form
+  if (loading) {
+    return <div className="min-h-screen bg-gray-50" />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">

@@ -11,6 +11,8 @@ import Register from './pages/Register';
 import JoinWorkspacePage from './pages/JoinWorkspacePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import VerifyEmailPage from './pages/VerifyEmailPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 function App() {
   return (
@@ -24,6 +26,8 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/join-workspace" element={<JoinWorkspacePage />} />
             <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route
               path="/home"
               element={

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react'; // Import Loader2 for the spinner
 import Button from './Button';
-import { inviteMembersApi } from '../apis/workspaceApi'; // Updated import
+import { inviteMembersApi } from '../apis/workspaceApi';
 import toast from 'react-hot-toast';
 import { useWorkspaces } from '../hooks/useWorkspaces';
 
@@ -11,6 +11,7 @@ const InviteMembersModal = ({ activeWorkspace, onClose }) => {
   const [role, setRole] = useState('viewer');
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState([]);
+  const [isSending, setIsSending] = useState(false); // New state for loading
   const { refetchWorkspaceMembers } = useWorkspaces();
 
   const isValidEmail = (email) => {
@@ -39,20 +40,15 @@ const InviteMembersModal = ({ activeWorkspace, onClose }) => {
   const sendInvitations = async () => {
     if (!activeWorkspace || members.length === 0) return;
 
+    setIsSending(true); // Start loading
     try {
-      // **MODIFICATION**: Use the new, specific API function
       const response = await inviteMembersApi(
         activeWorkspace.id,
         members,
         message
       );
-
-      console.log('Invite response:', response);
       setStatus(response);
       toast.success('Invitations process completed!');
-
-      // Refetch members to show newly added ones if any were directly added
-      // (or to prepare for future real-time updates)
       await refetchWorkspaceMembers();
 
       setTimeout(() => {
@@ -61,6 +57,8 @@ const InviteMembersModal = ({ activeWorkspace, onClose }) => {
     } catch (err) {
       console.error('Error sending invitations:', err);
       toast.error('Failed to send invitations.');
+    } finally {
+      setIsSending(false); // Stop loading
     }
   };
 
@@ -98,16 +96,22 @@ const InviteMembersModal = ({ activeWorkspace, onClose }) => {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               className="flex-1 border border-gray-300 p-2 rounded-md"
+              disabled={isSending} // Disable while sending
             />
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
               className="border border-gray-300 p-2 rounded-md"
+              disabled={isSending} // Disable while sending
             >
               <option value="viewer">Viewer</option>
               <option value="editor">Editor</option>
             </select>
-            <Button className="bg-blue-500 hover:bg-blue-400" onClick={addMemberToList}>Add</Button>
+
+            <Button onClick={addMemberToList} disabled={isSending}>
+              Add
+            </Button>
+
           </div>
           <div className="space-y-2 max-h-32 overflow-y-auto pr-2">
             {members.map((m, i) => (
@@ -121,6 +125,7 @@ const InviteMembersModal = ({ activeWorkspace, onClose }) => {
                 <button
                   onClick={() => removeMemberFromList(m.email)}
                   className="text-sm text-red-500 hover:text-red-700"
+                  disabled={isSending} // Disable while sending
                 >
                   Remove
                 </button>
@@ -143,15 +148,25 @@ const InviteMembersModal = ({ activeWorkspace, onClose }) => {
             onChange={(e) => setMessage(e.target.value)}
             placeholder="They will see this message in the invitation email..."
             className="w-full p-2 border border-gray-300 rounded-md"
+            disabled={isSending} // Disable while sending
           ></textarea>
         </div>
 
         <Button
           onClick={sendInvitations}
-          className="w-full mt-4 bg-blue-500 hover:bg-blue-400"
-          disabled={members.length === 0}
+
+          className="w-full mt-4 flex items-center justify-center"
+          disabled={members.length === 0 || isSending}
+
         >
-          Send Invitations
+          {isSending ? (
+            <>
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              Sending...
+            </>
+          ) : (
+            'Send Invitations'
+          )}
         </Button>
 
         {status.length > 0 && (

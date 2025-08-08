@@ -87,7 +87,9 @@ const PageEditor = ({
     };
 
     loadPageContent();
+
   }, [currentPage?.id, isEditMode, createdPageData, isReadOnly]);
+
 
   // Keyboard shortcuts
   useEffect(() => {
