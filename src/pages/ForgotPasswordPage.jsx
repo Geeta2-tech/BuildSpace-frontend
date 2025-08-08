@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { forgotPassword } from '../apis/authApi';
+import { forgotPasswordApi } from '../apis/authApi';
 import toast from 'react-hot-toast';
 import { Mail, ArrowLeft } from 'lucide-react';
 
@@ -13,7 +13,7 @@ const ForgotPasswordPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await forgotPassword(email);
+      await forgotPasswordApi(email);
       setSubmitted(true);
     } catch (error) {
       toast.error(

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
-import { loginUser } from '../apis/authApi';
+import { loginUserApi } from '../apis/authApi';
 import { useWorkspaces } from '../hooks/useWorkspaces';
 import toast from 'react-hot-toast';
 
@@ -44,7 +44,7 @@ const BasicLogin = () => {
   const handleLogin = async () => {
     if (email && password) {
       try {
-        await loginUser({ email, password });
+        await loginUserApi({ email, password });
         toast.success('Login successful!');
         await initializeSession();
         navigate('/home');

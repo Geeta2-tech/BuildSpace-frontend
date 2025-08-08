@@ -8,7 +8,6 @@ const sendVerificationCode = async (email) => {
       endpoint: '/auth/send-verification-code', // API endpoint for sending code
       data, // Send email data
     });
-    console.log('Verification code sent:', response);
     return response; // You can return the response if needed
   } catch (error) {
     console.error('Error sending verification code:', error);
@@ -20,12 +19,10 @@ const sendVerificationCode = async (email) => {
 const verifyCodeAndRegister = async (email, code) => {
   const data = { email, code }; // Send email and code together in the body
   try {
-    console.log(data);
     const response = await api.post({
       endpoint: '/auth/verify-code-and-register',
       data, // Send the data object correctly
     });
-    console.log('User registered successfully:', response);
 
     // Save tokens to localStorage
     if (response && response.tokens) {
@@ -40,7 +37,7 @@ const verifyCodeAndRegister = async (email, code) => {
   }
 };
 
-const registerUser = async ({ email, name, password }) => {
+const registerUserApi = async ({ email, name, password }) => {
   const data = { email, name, password };
   try {
     const response = await api.post({
@@ -54,14 +51,13 @@ const registerUser = async ({ email, name, password }) => {
   }
 };
 
-const loginUser = async ({ email, password }) => {
+const loginUserApi = async ({ email, password }) => {
   const data = { email, password };
   try {
     const response = await api.post({
       endpoint: '/auth/login',
       data,
     });
-    console.log(response);
     return response;
   } catch (error) {
     console.error('Error registering user:', error);
@@ -69,7 +65,7 @@ const loginUser = async ({ email, password }) => {
   }
 };
 
-const logoutUser = async () => {
+const logoutUserApi = async () => {
   try {
     const response = await api.post({
       endpoint: '/auth/logout',
@@ -93,7 +89,7 @@ const getCurrentUserApi = async () => {
   }
 };
 
-const sendEmailVerification = async () => {
+const sendEmailVerificationApi = async () => {
   try {
     const response = await api.get({
       endpoint: '/auth/send-verification',
@@ -105,7 +101,7 @@ const sendEmailVerification = async () => {
   }
 };
 
-const verifyEmail = async (token) => {
+const verifyEmailApi = async (token) => {
   try {
     const response = await api.get({
       endpoint: `/auth/verify-email?token=${token}`,
@@ -117,7 +113,7 @@ const verifyEmail = async (token) => {
   }
 };
 
-const forgotPassword = async (email) => {
+const forgotPasswordApi = async (email) => {
   try {
     const response = await api.post({
       endpoint: '/auth/forgot-password',
@@ -130,7 +126,7 @@ const forgotPassword = async (email) => {
   }
 };
 
-const resetPassword = async (token, newPassword) => {
+const resetPasswordApi = async (token, newPassword) => {
   try {
     const response = await api.post({
       endpoint: '/auth/reset-password',
@@ -143,7 +139,7 @@ const resetPassword = async (token, newPassword) => {
   }
 };
 
-const deleteUser = async () => {
+const deleteUserApi = async () => {
   try {
     const response = await api.delete({
       endpoint: '/auth/delete-user',
@@ -158,13 +154,13 @@ const deleteUser = async () => {
 export {
   sendVerificationCode,
   verifyCodeAndRegister,
-  registerUser,
-  loginUser,
-  logoutUser,
+  registerUserApi,
+  loginUserApi,
+  logoutUserApi,
   getCurrentUserApi,
-  sendEmailVerification,
-  verifyEmail,
-  forgotPassword,
-  resetPassword,
-  deleteUser,
+  sendEmailVerificationApi,
+  verifyEmailApi,
+  forgotPasswordApi,
+  resetPasswordApi,
+  deleteUserApi,
 };

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { verifyEmail } from '../apis/authApi'; // Assuming this function exists
+import { verifyEmailApi } from '../apis/authApi'; // Assuming this function exists
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -20,7 +20,7 @@ const VerifyEmailPage = () => {
       }
 
       try {
-        await verifyEmail(token);
+        await verifyEmailApi(token);
         setStatus('success');
         setMessage('Your email has been successfully verified!');
         toast.success('Email verified! You can now log in.');

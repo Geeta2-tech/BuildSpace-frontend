@@ -5,34 +5,25 @@ import {
   Star,
   Trash2,
   UserPlus,
-  Settings,
-  HelpCircle,
-  Sun,
-  Moon,
   Mail,
   Check,
   X,
-  ChevronDown,
-  ChevronRight,
   Loader2,
 } from 'lucide-react';
 import Button from './Button';
-import { SIDEBAR_ITEMS } from '../utils/constants';
 import { useState, useEffect, useRef } from 'react';
 import InviteMembersModal from './InviteMembersModal';
 import { useWorkspaces } from '../hooks/useWorkspaces';
 import ConfirmationModal from './ConfirmationModal';
-import UserProfileMenu from './UserProfileMenu'; // Import new component
-import WorkspaceDropdown from './WorkspaceDropdown'; // Import new component
+import UserProfileMenu from './UserProfileMenu';
+import WorkspaceDropdown from './WorkspaceDropdown';
 import ProfileModal from './ProfileModal';
 
 const Sidebar = ({
-  theme,
-  toggleTheme,
   pages = [],
   pagesLoading = false,
   pagesError = null,
-  onPageSelect, // Add this prop to handle page selection
+  onPageSelect,
 }) => {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -40,9 +31,6 @@ const Sidebar = ({
   const [workspaceToDelete, setWorkspaceToDelete] = useState(null);
   const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState(null);
-  // Add state to manage the visibility of private pages
-  const [showPrivatePages, setShowPrivatePages] = useState(true);
-  // Add state to manage the visibility of workspace pages when "All Pages" is clicked
   const [showAllPages, setShowAllPages] = useState(false);
 
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -274,21 +262,6 @@ const Sidebar = ({
               Invite members
             </Button>
           )}
-          <div className="flex items-center justify-between">
-            <Button variant="ghost" size="sm">
-              <Settings className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm">
-              <HelpCircle className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={toggleTheme}>
-              {theme === 'dark' ? (
-                <Sun className="w-4 h-4" />
-              ) : (
-                <Moon className="w-4 h-4" />
-              )}
-            </Button>
-          </div>
         </div>
 
         {isOwner && showInviteModal && (

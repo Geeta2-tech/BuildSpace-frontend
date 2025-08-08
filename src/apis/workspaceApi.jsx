@@ -1,14 +1,11 @@
 import api from '../utils/api';
 
-// --- Workspace Management ---
-
 const createWorkspaceApi = async (name) => {
   try {
     const response = await api.post({
       endpoint: '/workspace/create',
       data: { name },
     });
-    console.log('Workspace created:', response);
     return response;
   } catch (error) {
     console.error('Error creating workspace:', error);
@@ -16,7 +13,7 @@ const createWorkspaceApi = async (name) => {
   }
 };
 
-const getAllWorkspaces = async () => {
+const getAllWorkspacesApi = async () => {
   try {
     const response = await api.get({
       endpoint: '/workspace/get-all',
@@ -40,7 +37,7 @@ const deleteWorkspaceApi = async (workspaceId) => {
   }
 };
 
-const getAllWorkspaceMembers = async (workspaceId) => {
+const getAllWorkspaceMembersApi = async (workspaceId) => {
   try {
     const response = await api.get({
       endpoint: `/workspace/get-all-members?workspaceId=${workspaceId}`,
@@ -52,7 +49,7 @@ const getAllWorkspaceMembers = async (workspaceId) => {
   }
 };
 
-const removeAMember = async (workspaceId, userId) => {
+const removeAMemberApi = async (workspaceId, userId) => {
   try {
     const response = await api.delete({
       endpoint: `/workspace/remove-members/?workspaceId=${workspaceId}&userId=${userId}`,
@@ -105,13 +102,11 @@ const getInvitationDetailsApi = async (token) => {
 };
 
 const acceptInvitationApi = async (token) => {
-  console.log('Accepting invitation with token (Frontend API):', token);
   try {
     const response = await api.post({
       endpoint: '/workspace/accept-invitation',
       data: { token },
     });
-    console.log('Invitation accepted:', response);
     return response;
   } catch (error) {
     console.error('Error accepting invitation:', error);
@@ -134,10 +129,10 @@ const declineInvitationApi = async (token) => {
 
 export {
   createWorkspaceApi,
-  getAllWorkspaces,
+  getAllWorkspacesApi,
   deleteWorkspaceApi,
-  getAllWorkspaceMembers,
-  removeAMember,
+  getAllWorkspaceMembersApi,
+  removeAMemberApi,
   inviteMembersApi,
   getPendingInvitationsApi,
   acceptInvitationApi,
